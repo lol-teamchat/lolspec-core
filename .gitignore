@@ -1,0 +1,12 @@
+/node_modules
+/lol-ob
+config.json
+discordleaguebotv1/token_loc
+discordleaguebotv1/settings.json
+discordleaguebotv1/bin/
+discordleaguebotv1/recordings/
+.metadata/
+.recommenders/
+discordleaguebotv1/.settings/
+discordleaguebotv1/.classpath
+discordleaguebotv1/.project
