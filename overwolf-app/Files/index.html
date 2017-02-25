@@ -1,0 +1,46 @@
+﻿<!DOCTYPE html>
+<html>
+	<head>
+		<link rel="stylesheet" href="style.css" />
+		<meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+		<title>LoL Spectate</title>
+		<script type="text/javascript" src="script.js"></script>
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+	</head>
+
+	<body>
+		<div class="resizeGrip" id="resizeGripTopLeft" onmousedown="dragResize('TopLeft');"></div>
+		<div class="resizeGrip" id="resizeGripTop" onmousedown="dragResize('Top');"></div>
+		<div class="resizeGrip" id="resizeGripTopRight" onmousedown="dragResize('TopRight');"></div>
+		<div class="resizeGrip" id="resizeGripRight" onmousedown="dragResize('Right');"></div>
+		<div class="resizeGrip" id="resizeGripBottomRight" onmousedown="dragResize('BottomRight');"></div>
+		<div class="resizeGrip" id="resizeGripBottom" onmousedown="dragResize('Bottom');"></div>
+		<div class="resizeGrip" id="resizeGripBottomLeft" onmousedown="dragResize('BottomLeft');"></div>
+		<div class="resizeGrip" id="resizeGripLeft" onmousedown="dragResize('Left');"></div>
+		<div id="content" onmousedown="dragMove();">
+			<button id="close" onclick="closeWindow();">Close</button>
+			<button onclick="takeScreenshot();">Take Screenshot</button>
+			<button id="open-subwindow" onclick="openSubWindow();">Open Sub-Window</button>
+			<img id="screenshot" width="300px"></img>
+		</div>
+		<div id="output_log" style="padding-top: 50px;padding-right: 30px; padding-bottom: 30px; padding-left: 30px; overflow:auto;">
+			<h>messages display here</h>
+		</div>
+		<audio class="audioDemo" oncanplaythrough="setTimeout(myOnCanPlayThrough, 1000)"
+			src="maonbass.mp3" type="audio/mpeg">
+		</audio>
+		<script>
+			// logging
+			function addmsg(msg) {
+				$('#output_log').append('<p style="margin-top: 0px; margin-bottom: 0px;">'+msg+'</p>')
+			}
+
+			addmsg('loading audio..');
+			function myOnCanPlayThrough() {
+				console.log('Can play through');
+				addmsg('finished loading audio.');
+				$('.audioDemo')[0].play();
+			}
+		</script>
+	</body>
+</html>
