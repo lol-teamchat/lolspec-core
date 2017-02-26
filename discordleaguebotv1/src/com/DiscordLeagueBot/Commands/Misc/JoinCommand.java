@@ -1,7 +1,16 @@
 package com.DiscordLeagueBot.Commands.Misc;
 
 import com.DiscordLeagueBot.Commands.Command;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.PrintWriter;
+import java.time.OffsetDateTime;
+
 import com.DiscordLeagueBot.DiscordLeagueBot;
+
+import net.dv8tion.jda.core.entities.VoiceChannel;
+import net.dv8tion.jda.core.events.channel.text.TextChannelCreateEvent;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
 
 
@@ -35,8 +44,59 @@ public class JoinCommand implements Command {
             DiscordLeagueBot.writeToFile(e.getGuild());
 
         DiscordLeagueBot.joinVoiceChannel(e.getMember().getVoiceState().getChannel(), true);
+        
+        File dest = null;
+        try {
+
+            if (new File("C:/Users/Evan Green/Desktop/recording/").exists())
+                dest = new File("C:/Users/Evan Green/Desktop/recording/timestamp" + ".txt");
+            else
+                dest = new File("C:/Users/Evan Green/Desktop/recording/timestamp" + ".txt");
+            
+        }
+        catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        try(  PrintWriter outfile = new PrintWriter(dest)  ){
+            outfile.println(e.getGuild());
+            outfile.println( OffsetDateTime.now());
+        }
+        
+        catch (Exception ex) {
+            ex.printStackTrace();
+        }
     }
 
+    
+   /* public void action(String[] args, int guild, int channel, int member) {
+
+    	
+    	VoiceChannel vc = new VoiceChannel;
+        DiscordLeagueBot.joinVoiceChannel( GuildMessageReceivedEvent e.getMember().getVoiceState().getChannel(), true);
+        
+        File dest = null;
+        try {
+
+            if (new File("C:/Users/Evan Green/Desktop/recording/").exists())
+                dest = new File("C:/Users/Evan Green/Desktop/recording/timestamp" + ".txt");
+            else
+                dest = new File("C:/Users/Evan Green/Desktop/recording/timestamp" + ".txt");
+            
+        }
+        catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        try(  PrintWriter outfile = new PrintWriter(dest)  ){
+            outfile.println(e.getGuild());
+            outfile.println( OffsetDateTime.now());
+        }
+        
+        catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+    */
+    
     @Override
     public String usage() {
         return "join";
