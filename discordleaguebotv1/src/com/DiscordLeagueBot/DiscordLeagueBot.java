@@ -5,6 +5,7 @@ import com.DiscordLeagueBot.Commands.Audio.ClipCommand;
 import com.DiscordLeagueBot.Commands.Audio.SaveCommand;
 import com.DiscordLeagueBot.Commands.Misc.HelpCommand;
 import com.DiscordLeagueBot.Commands.Misc.JoinCommand;
+import com.DiscordLeagueBot.Commands.Misc.JoinidCommand;
 import com.DiscordLeagueBot.Commands.Misc.LeaveCommand;
 import com.DiscordLeagueBot.Configuration.ServerSettings;
 import com.DiscordLeagueBot.Listeners.AudioReceiveListener;
@@ -33,6 +34,7 @@ import static java.lang.Thread.sleep;
 
 public class DiscordLeagueBot
 {
+	public static JDA api;
     public static HashMap<String, ServerSettings> serverSettings = new HashMap<>();
 
     public static void main(String[] args)
@@ -45,7 +47,7 @@ public class DiscordLeagueBot
             BufferedReader br = new BufferedReader(fr);
             String token = br.readLine();
 
-            JDA api = new JDABuilder(AccountType.BOT)
+            api = new JDABuilder(AccountType.BOT)
                     .setToken(token)
                     .addListener(new EventListener())
                     .buildBlocking();
@@ -85,6 +87,7 @@ public class DiscordLeagueBot
         CommandHandler.commands.put("leave", new LeaveCommand());
         CommandHandler.commands.put("save", new SaveCommand());
         CommandHandler.commands.put("clip", new ClipCommand());
+        CommandHandler.commands.put("joinid", new JoinidCommand());
 
     }
     
