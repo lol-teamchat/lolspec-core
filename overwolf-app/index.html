@@ -1,0 +1,39 @@
+﻿<!DOCTYPE html>
+<html>
+	<head>
+		<link rel="stylesheet" href="style.css" />
+		<meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+		<title>LoL Spectate</title>
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+	</head>
+
+	<body>
+		<div id="content" onmousedown="dragMove();">
+			<button id="close" onclick="closeWindow();">Close</button>
+		</div>
+		<div id="output_log" style="padding-top: 50px;padding-right: 30px; padding-bottom: 30px; padding-left: 30px;">
+			<h1 id="title"></h1>
+		    <hr>
+		    <div id="messages"></div>
+		</div>
+		<!-- <audio class="audioDemo" oncanplaythrough="setTimeout(myOnCanPlayThrough, 1000)"
+			src="maonbass.mp3" type="audio/mpeg">
+		</audio> -->
+		<!-- <script>
+			// logging
+			function addmsg(msg) {
+				$('#output_log').append('<p style="margin-top: 0px; margin-bottom: 0px;">'+msg+'</p>')
+			}
+
+			addmsg('loading audio..');
+			function myOnCanPlayThrough() {
+				addmsg('finished loading audio.');
+				$('.audioDemo')[0].play();
+			}
+		</script> -->
+	</body>
+
+	<script type="text/javascript" src="overwolfplugin.js"></script>
+	<script type="text/javascript" src="script.js"></script>
+	<!-- <script type="text/javascript" src="plugin.js"></script> -->
+</html>
