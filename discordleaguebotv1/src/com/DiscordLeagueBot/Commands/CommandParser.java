@@ -15,9 +15,25 @@ public class CommandParser {
         String invoke = split.get(0);
         String[] args = new String[split.size() - 1];
         split.subList(1,split.size()).toArray(args);
-
         return new CommandContainer(raw, beheaded, splitBeheaded, invoke, args, e);
     }
+    
+	public CommandContainer parse(String id) {
+		
+		String[] splitStr = id.split("\\s+");
+        ArrayList<String> split = new ArrayList<>();
+        String prefix = DiscordLeagueBot.serverSettings.get(DiscordLeagueBot.api.getGuildById(splitStr[1]).getId()).prefix;
+        String raw = id;
+        String beheaded = raw.replaceFirst(prefix, "");
+        String[] splitBeheaded = beheaded.split(" ");
+        for(String s : splitBeheaded) {split.add(s);}
+        String invoke = split.get(0);
+        String[] args = new String[split.size() - 1];
+        split.subList(1,split.size()).toArray(args);
+        GuildMessageReceivedEvent e = null;
+
+        return new CommandContainer(raw, beheaded, splitBeheaded, invoke, args, e);
+	}
 
     public class CommandContainer {
         public final String raw;
@@ -37,4 +53,5 @@ public class CommandParser {
             this.e = e;
         }
     }
+
 }

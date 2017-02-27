@@ -20,4 +20,19 @@ public class CommandHandler {
             }
         }
     }
+    
+    public static void handleCommand2(CommandParser.CommandContainer cmd){
+        if (commands.containsKey(cmd.invoke)) {
+            Boolean safe = true;
+
+            if (safe) {
+                commands.get(cmd.invoke).action2(cmd.args);
+                commands.get(cmd.invoke).executed2(safe);
+
+            }
+            else {
+                commands.get(cmd.invoke).executed2(safe);
+            }
+        }
+    }
 }

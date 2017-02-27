@@ -14,6 +14,12 @@ public class SaveidCommand implements Command {
 
     @Override
     public void action(String[] args, GuildMessageReceivedEvent e) {
+    		DiscordLeagueBot.in_vc = false;
+            DiscordLeagueBot.writeToFile(DiscordLeagueBot.api.getGuildById(args[0]));
+    }
+    
+    public void action2(String[] args) {
+    		DiscordLeagueBot.in_vc = false;
             DiscordLeagueBot.writeToFile(DiscordLeagueBot.api.getGuildById(args[0]));
     }
     
@@ -31,4 +37,16 @@ public class SaveidCommand implements Command {
     public void executed(boolean success, GuildMessageReceivedEvent e){
         return;
     }
+
+	@Override
+	public Boolean called2(String[] args) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void executed2(boolean success) {
+		// TODO Auto-generated method stub
+		
+	}
 }

@@ -1,59 +1,56 @@
 package com.DiscordLeagueBot.Commands.Misc;
 
 import java.io.BufferedReader;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.lang.reflect.Member;
 import java.util.List;
 
 import com.DiscordLeagueBot.DiscordLeagueBot;
 import com.DiscordLeagueBot.Commands.Command;
+import com.DiscordLeagueBot.Listeners.AudioReceiveListener;
 
+import net.dv8tion.jda.core.entities.Member;
+import net.dv8tion.jda.core.entities.User;
 import net.dv8tion.jda.core.entities.VoiceChannel;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
+import net.dv8tion.jda.core.audio.AudioConnection;
+import net.dv8tion.jda.core.audio.hooks.*;
 
 
 public class JoinidCommand implements Command {
 	
 	public VoiceChannel findCorrectChannel(String g) throws IOException{
-        int j=0;
+        int j = 0;
         int [] arr = new int [DiscordLeagueBot.api.getGuildById(g).getVoiceChannels().size()+1];
         for (int e : arr){
         	arr[e]=0;
-        	System.out.println(e+ ", " + arr[e]);
         }
-        System.out.println(g);
         
 		FileReader fr = new FileReader("names");
         BufferedReader br = new BufferedReader(fr);
         String name;
         while((name = br.readLine()) != null){
-        	j=0;
+        	j = 0;
 	        for (VoiceChannel i : DiscordLeagueBot.api.getGuildById(g).getVoiceChannels()){
-	        	System.out.println(i);
 	        	for (net.dv8tion.jda.core.entities.Member k : i.getMembers()){
 		        	if(k.getUser().getName().equals(name)){
-			        	System.out.println(k.getUser().getName() + "in channel" + i);
 			        	arr[j]++;
-			        	System.out.println(j + "," + arr[j]);
 		        	}
 	        	}
 	        	j++;
 	        }
         }
+        br.close();
 		
         VoiceChannel vc = DiscordLeagueBot.api.getGuildById(g).getVoiceChannels().get(0);
         int biggest = arr[0];
-        System.out.println("pre for, " + vc);
         for(int i = 0; i < DiscordLeagueBot.api.getGuildById(g).getVoiceChannels().size()+1; i++){
         	if(arr[i] > biggest){
         		vc = DiscordLeagueBot.api.getGuildById(g).getVoiceChannels().get(i);
         		biggest = arr[i];
         	}
-        	System.out.println("after for, " + arr[i] + ", " + vc);
         }
-        System.out.println("largest vc is" + vc.getName());
+        System.out.println(vc.getName() + "has the most matching members as on website team");
         return vc;
 	}
 	
@@ -64,14 +61,66 @@ public class JoinidCommand implements Command {
   
     public void action(String[] args, GuildMessageReceivedEvent e) {
         
-    	try {
-			DiscordLeagueBot.joinVoiceChannel(findCorrectChannel(args[0]),true);
-		} catch (IOException e1) {
+    	VoiceChannel vc=null;
+		try {
+			vc = findCorrectChannel(args[0]);
+		} catch (IOException e2) {
 			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}	
+			e2.printStackTrace();
+		}
+		
+		DiscordLeagueBot.joinVoiceChannel(vc,true);
+		DiscordLeagueBot.in_vc = true;
+		AudioReceiveListener ah = (AudioReceiveListener) DiscordLeagueBot.api.getGuildById(args[0]).getAudioManager().getReceiveHandler();
+		//while(DiscordLeagueBot.in_vc)
+		
+		//System.out.println(ah.compVoiceData);
+
+		//}
+		//	List<Member> mems = vc.getMembers();
+		//	for (Member i : mems){
+		//		if(lx.onUserSpeaking((User)mems[i], true)
+			//}
+			//	if(i.getVoiceState() != null){
+				//System.out.println("state: ");
+				//System.out.print("what");
+		//		}
+		//	}
+		//}
+	//	}
     }
     	
+    
+ public void action2(String[] args) {
+        
+    	VoiceChannel vc=null;
+		try {
+			vc = findCorrectChannel(args[0]);
+		} catch (IOException e2) {
+			// TODO Auto-generated catch block
+			e2.printStackTrace();
+		}
+		
+		DiscordLeagueBot.joinVoiceChannel(vc,true);
+		DiscordLeagueBot.in_vc = true;
+		AudioReceiveListener ah = (AudioReceiveListener) DiscordLeagueBot.api.getGuildById(args[0]).getAudioManager().getReceiveHandler();
+		//while(DiscordLeagueBot.in_vc)
+		
+		//System.out.println(ah.compVoiceData);
+
+		//}
+		//	List<Member> mems = vc.getMembers();
+		//	for (Member i : mems){
+		//		if(lx.onUserSpeaking((User)mems[i], true)
+			//}
+			//	if(i.getVoiceState() != null){
+				//System.out.println("state: ");
+				//System.out.print("what");
+		//		}
+		//	}
+		//}
+	//	}
+    }
 	@Override
 	public String usage() {
 		// TODO Auto-generated method stub
@@ -86,6 +135,18 @@ public class JoinidCommand implements Command {
 
 	@Override
 	public void executed(boolean success, GuildMessageReceivedEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public Boolean called2(String[] args) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void executed2(boolean success) {
 		// TODO Auto-generated method stub
 		
 	}

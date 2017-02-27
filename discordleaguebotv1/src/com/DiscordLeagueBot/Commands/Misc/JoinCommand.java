@@ -3,16 +3,9 @@ package com.DiscordLeagueBot.Commands.Misc;
 import com.DiscordLeagueBot.Commands.Command;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.PrintWriter;
-import java.net.URL;
-import java.net.URLConnection;
 import java.time.OffsetDateTime;
-
 import com.DiscordLeagueBot.DiscordLeagueBot;
-
-import net.dv8tion.jda.core.entities.VoiceChannel;
-import net.dv8tion.jda.core.events.channel.text.TextChannelCreateEvent;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
 
 
@@ -69,47 +62,6 @@ public class JoinCommand implements Command {
             ex.printStackTrace();
         }
     }
-    	
-    	
-    	
-    	
-    	/*
-    	String url = "GET/api/channels/{" + channel + "}";
-    	URLConnection connection = new URL(url + "?" + query).openConnection();
-    	connection.setRequestProperty("Accept-Charset", charset);
-    	InputStream response = connection.getInputStream();
-    	// ...
-    	GetMethod get = new GetMethod("http://httpcomponents.apache.org");
-    	// execute method and handle any error responses.
-    	...
-    	InputStream in = get.getResponseBodyAsStream();
-    	// Process the data from the input stream.
-    	get.releaseConnection();
-    	GET/api/channels/{channel}
-    	VoiceChannel vc = new VoiceChannel;
-        DiscordLeagueBot.joinVoiceChannel( GuildMessageReceivedEvent e.getMember().getVoiceState().getChannel(), true);
-        
-        File dest = null;
-        try {
-
-            if (new File("C:/Users/Evan Green/Desktop/recording/").exists())
-                dest = new File("C:/Users/Evan Green/Desktop/recording/timestamp" + ".txt");
-            else
-                dest = new File("C:/Users/Evan Green/Desktop/recording/timestamp" + ".txt");
-            
-        }
-        catch (Exception ex) {
-            ex.printStackTrace();
-        }
-        try(  PrintWriter outfile = new PrintWriter(dest)  ){
-            outfile.println(e.getGuild());
-            outfile.println( OffsetDateTime.now());
-        }
-        
-        catch (Exception ex) {
-            ex.printStackTrace();
-        }
-        */
     
     
     
@@ -127,4 +79,22 @@ public class JoinCommand implements Command {
     public void executed(boolean success, GuildMessageReceivedEvent e){
         return;
     }
+
+	@Override
+	public Boolean called2(String[] args) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void action2(String[] args) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void executed2(boolean success) {
+		// TODO Auto-generated method stub
+		
+	}
 }

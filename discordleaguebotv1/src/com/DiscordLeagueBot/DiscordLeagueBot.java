@@ -37,6 +37,7 @@ public class DiscordLeagueBot
 {
 	public static JDA api;
     public static HashMap<String, ServerSettings> serverSettings = new HashMap<>();
+    public static boolean in_vc = false;
 
     public static void main(String[] args)
     {
@@ -52,6 +53,9 @@ public class DiscordLeagueBot
                     .setToken(token)
                     .addListener(new EventListener())
                     .buildBlocking();
+            br.close();
+            
+            com.ConsoleCommand.ConsoleCommand1.instance.start();
         }
         
         catch (InterruptedException ex)
@@ -217,25 +221,6 @@ public class DiscordLeagueBot
         } catch (Exception ex) {}
     }
 
-    public static void alert(VoiceChannel vc) {
-        for (Member m : vc.getMembers()) {
-            if(m.getUser() == vc.getJDA().getSelfUser()) continue;
-            if (!serverSettings.get(vc.getGuild().getId()).alertBlackList.contains(m.getUser().getId()) && !m.getUser().isBot()) {
-
-                EmbedBuilder embed = new EmbedBuilder();
-                embed.setAuthor("Discord LeagueBot", "https://github.com/adamschachne/league-replay", vc.getJDA().getSelfUser().getAvatarUrl());
-                embed.setColor(Color.PINK);
-                embed.setTitle("Your audio is now being recorded in '" + vc.getName() + "' on '" + vc.getGuild().getName() + "'");
-                embed.setDescription("Cancel recording with ``!leave``");
-                embed.setThumbnail("http://i.imgur.com/gNBibKi.png");
-                embed.setTimestamp(OffsetDateTime.now());
-
-                m.getUser().openPrivateChannel().queue(privateChannel -> privateChannel.sendMessage(embed.build()).queue());
-
-            }
-        }
-    }
-
 
     public static String getRandString() {
         String SALTCHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890";
@@ -303,8 +288,6 @@ public class DiscordLeagueBot
             if (warning)
                 sendMessage(vc.getGuild().getPublicChannel(), "I don't have permission to join that voice channel!");
         }
-
-        DiscordLeagueBot.alert(vc);
         double volume = DiscordLeagueBot.serverSettings.get(vc.getGuild().getId()).volume;
         vc.getGuild().getAudioManager().setReceivingHandler(new AudioReceiveListener(volume));
 

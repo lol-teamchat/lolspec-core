@@ -56,4 +56,22 @@ public class HelpCommand implements Command {
     public void executed(boolean success, GuildMessageReceivedEvent e){
         return;
     }
+
+	@Override
+	public Boolean called2(String[] args) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void action2(String[] args) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void executed2(boolean success) {
+		// TODO Auto-generated method stub
+		
+	}
 }
