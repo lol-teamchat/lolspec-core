@@ -7,6 +7,7 @@ import com.DiscordLeagueBot.Commands.Misc.HelpCommand;
 import com.DiscordLeagueBot.Commands.Misc.JoinCommand;
 import com.DiscordLeagueBot.Commands.Misc.JoinidCommand;
 import com.DiscordLeagueBot.Commands.Misc.LeaveCommand;
+import com.DiscordLeagueBot.Commands.Misc.SaveidCommand;
 import com.DiscordLeagueBot.Configuration.ServerSettings;
 import com.DiscordLeagueBot.Listeners.AudioReceiveListener;
 import com.DiscordLeagueBot.Listeners.AudioSendListener;
@@ -88,6 +89,7 @@ public class DiscordLeagueBot
         CommandHandler.commands.put("save", new SaveCommand());
         CommandHandler.commands.put("clip", new ClipCommand());
         CommandHandler.commands.put("joinid", new JoinidCommand());
+        CommandHandler.commands.put("saveid", new SaveidCommand());
 
     }
     
@@ -130,12 +132,11 @@ public class DiscordLeagueBot
     }
 
     public static void writeToFile(Guild guild, int time, TextChannel tc) {
-        if (tc == null)
-            tc = guild.getTextChannelById(serverSettings.get(guild.getId()).defaultTextChannel);
-        
+        //if (tc == null)
+        //    tc = guild.getTextChannelById(serverSettings.get(guild.getId()).defaultTextChannel);
         AudioReceiveListener ah = (AudioReceiveListener) guild.getAudioManager().getReceiveHandler();
         if (ah == null) {
-            DiscordLeagueBot.sendMessage(tc, "I wasn't recording!");
+          //  DiscordLeagueBot.sendMessage(tc, "I wasn't recording!");
             return;
         }
 
@@ -166,10 +167,10 @@ public class DiscordLeagueBot
                     dest.getName(), guild.getAudioManager().getConnectedChannel().getName(), guild.getName(), (double) dest.length() / 1024 / 1024);
 
             if (dest.length() / 1024 / 1024 < 8) {
-                final TextChannel channel = tc;
-                tc.sendFile(dest, null).queue(null, (Throwable) -> {
-                    channel.sendMessage("I don't have permissions to send files here!").queue();
-                });
+               // final TextChannel channel = tc;
+               // tc.sendFile(dest, null).queue(null, (Throwable) -> {
+                //    channel.sendMessage("I don't have permissions to send files here!").queue();
+                //});
 
                 new Thread(() -> {
                     try { sleep(1000 * 20); } catch (Exception ex) {}    //20 second life for files set to discord (no need to save)
@@ -180,7 +181,7 @@ public class DiscordLeagueBot
                 }).start();
 
             } else {
-                DiscordLeagueBot.sendMessage(tc, "C:/Users/Evan Green/Desktop/recording/" + dest.getName());
+              //  DiscordLeagueBot.sendMessage(tc, "C:/Users/Evan Green/Desktop/recording/" + dest.getName());
 
                 new Thread(() -> {
                     try { sleep(1000 * 60 * 60); } catch (Exception ex) {}    //1 hour life for files stored on web server
@@ -194,10 +195,10 @@ public class DiscordLeagueBot
         } catch (Exception ex) {
             ex.printStackTrace();
 
-            if (tc != null)
-                DiscordLeagueBot.sendMessage(tc, "Unknown error sending file");
-            else
-                DiscordLeagueBot.sendMessage(guild.getTextChannelById(serverSettings.get(guild.getId()).defaultTextChannel), "Unknown error sending file");
+           // if (tc != null)
+            //    DiscordLeagueBot.sendMessage(tc, "Unknown error sending file");
+           // else
+            //    DiscordLeagueBot.sendMessage(guild.getTextChannelById(serverSettings.get(guild.getId()).defaultTextChannel), "Unknown error sending file");
 
         }
     }
