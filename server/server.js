@@ -10,7 +10,7 @@ process.stdout.write('\033c');
 // define variables
 var api_key, players;
 var interval_ms = 5000;// how long to wait before checking if a summoner is in game
-var config = JSON.parse(fs.readFileSync('./config.json')); // read config
+var config = JSON.parse(fs.readFileSync('config/config.json')); // read config
 api_key = config.api_key;
 players = config.players;
 
@@ -43,7 +43,7 @@ function check_is_in_game(summoner, spinner) {
 		response.on('end', function() {
 			if (response.statusCode == 200) {
 				responseObj = JSON.parse(str);
-				console.log("game found!"); //" for [" +summoner.name+", "+summoner.region+ "]!");
+				console.log("game found!");
 				console.log("gameMode: " + responseObj.gameMode);
 				console.log("gameType: " + responseObj.gameType);
 				console.log("gameId: " + responseObj.gameId);
@@ -56,6 +56,7 @@ function check_is_in_game(summoner, spinner) {
 			else {
 				// 404 error; check again in 5 seconds
 				setTimeout(function() {
+					console.log("retry")
 					check_is_in_game(summoner, spinner);
 				}, 5000)
 			}
