@@ -1,8 +1,11 @@
 package com.DiscordLeagueBot.Commands.Misc;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.time.OffsetDateTime;
 import java.util.List;
 
 import com.DiscordLeagueBot.DiscordLeagueBot;
@@ -69,6 +72,27 @@ public class JoinidCommand implements Command {
 			e2.printStackTrace();
 		}
 		
+		File dest = null;
+        try {
+
+            if (new File("C:/Users/Evan Green/Desktop/recording/").exists())
+                dest = new File("C:/Users/Evan Green/Desktop/recording/timestamp" + ".txt");
+            else
+                dest = new File("C:/Users/Evan Green/Desktop/recording/timestamp" + ".txt");
+            
+        }
+        catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        try(  PrintWriter outfile = new PrintWriter(dest)  ){
+            outfile.print("Guild: " + DiscordLeagueBot.api.getGuildById(args[0]) + " ");
+            outfile.println("Time_Joined_Channel: " + OffsetDateTime.now());
+        }
+        
+        catch (Exception ex) {
+            ex.printStackTrace();
+        }
+		
 		DiscordLeagueBot.joinVoiceChannel(vc,true);
 		DiscordLeagueBot.in_vc = true;
 		AudioReceiveListener ah = (AudioReceiveListener) DiscordLeagueBot.api.getGuildById(args[0]).getAudioManager().getReceiveHandler();
@@ -100,6 +124,27 @@ public class JoinidCommand implements Command {
 			// TODO Auto-generated catch block
 			e2.printStackTrace();
 		}
+		
+		File dest = null;
+        try {
+
+            if (new File("C:/Users/Evan Green/Desktop/recording/").exists())
+                dest = new File("C:/Users/Evan Green/Desktop/recording/timestamp" + ".txt");
+            else
+                dest = new File("C:/Users/Evan Green/Desktop/recording/timestamp" + ".txt");
+            
+        }
+        catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        try(  PrintWriter outfile = new PrintWriter(dest)  ){
+            outfile.print("Guild: " + DiscordLeagueBot.api.getGuildById(args[0]) + " ");
+            outfile.println("Time_Joined_Channel: " + OffsetDateTime.now());
+        }
+       
+        catch (Exception ex) {
+            ex.printStackTrace();
+        }
 		
 		DiscordLeagueBot.joinVoiceChannel(vc,true);
 		DiscordLeagueBot.in_vc = true;

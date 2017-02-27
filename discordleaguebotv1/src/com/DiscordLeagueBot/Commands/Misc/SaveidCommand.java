@@ -1,6 +1,12 @@
 package com.DiscordLeagueBot.Commands.Misc;
 
 import com.DiscordLeagueBot.Commands.Command;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.PrintWriter;
+import java.time.OffsetDateTime;
+
 import com.DiscordLeagueBot.DiscordLeagueBot;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
 
@@ -21,6 +27,28 @@ public class SaveidCommand implements Command {
     public void action2(String[] args) {
     		DiscordLeagueBot.in_vc = false;
             DiscordLeagueBot.writeToFile(DiscordLeagueBot.api.getGuildById(args[0]));
+            
+            File dest = null;
+            try {
+
+                if (new File("C:/Users/Evan Green/Desktop/recording/").exists())
+                    dest = new File("C:/Users/Evan Green/Desktop/recording/timestamp" + ".txt");
+                else
+                    dest = new File("C:/Users/Evan Green/Desktop/recording/timestamp" + ".txt");
+                
+            }
+            catch (Exception ex) {
+                ex.printStackTrace();
+            }
+            try(  PrintWriter outfile = new PrintWriter(new FileOutputStream (dest,true))  ){
+                outfile.append("Guild: " + DiscordLeagueBot.api.getGuildById(args[0]) + " ");
+                outfile.append("Time_Left_Channel: " + OffsetDateTime.now());
+            }
+            
+            catch (Exception ex) {
+                ex.printStackTrace();
+            }
+            
             DiscordLeagueBot.leaveVoiceChannel(DiscordLeagueBot.api.getGuildById(args[0]).getAudioManager().getConnectedChannel());
     }
     
