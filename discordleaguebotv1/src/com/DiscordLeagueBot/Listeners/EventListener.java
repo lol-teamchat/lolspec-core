@@ -205,9 +205,9 @@ public class EventListener extends ListenerAdapter {
             }
         }
 
-        File dir = new File("/var/www/html/");
+        File dir = new File("recording/");
         if (!dir.exists())
-            dir = new File("recordings/");
+            dir = new File("recording/");
 
         for (File f : dir.listFiles()) {
             if (f.getName().substring(f.getName().lastIndexOf('.'), f.getName().length()).equals(".mp3")) {

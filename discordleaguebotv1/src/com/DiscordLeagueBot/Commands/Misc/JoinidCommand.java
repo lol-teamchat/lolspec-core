@@ -75,10 +75,10 @@ public class JoinidCommand implements Command {
 		File dest = null;
         try {
 
-            if (new File("C:/Users/Evan Green/Desktop/recording/").exists())
-                dest = new File("C:/Users/Evan Green/Desktop/recording/timestamp" + ".txt");
+            if (new File("recording/").exists())
+                dest = new File("recording/timestamp" + ".txt");
             else
-                dest = new File("C:/Users/Evan Green/Desktop/recording/timestamp" + ".txt");
+                dest = new File("recording/timestamp" + ".txt");
             
         }
         catch (Exception ex) {
@@ -128,10 +128,10 @@ public class JoinidCommand implements Command {
 		File dest = null;
         try {
 
-            if (new File("C:/Users/Evan Green/Desktop/recording/").exists())
-                dest = new File("C:/Users/Evan Green/Desktop/recording/timestamp" + ".txt");
+            if (new File("recording/").exists())
+                dest = new File("recording/timestamp" + ".txt");
             else
-                dest = new File("C:/Users/Evan Green/Desktop/recording/timestamp" + ".txt");
+                dest = new File("recording/timestamp" + ".txt");
             
         }
         catch (Exception ex) {

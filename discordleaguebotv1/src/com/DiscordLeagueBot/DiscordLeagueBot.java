@@ -147,10 +147,10 @@ public class DiscordLeagueBot
         File dest;
         try {
 
-            if (new File("C:/Users/Evan Green/Desktop/recording/").exists())
-                dest = new File("C:/Users/Evan Green/Desktop/recording/" + getRandString() + ".mp3");
+            if (new File("recording/").exists())
+                dest = new File("recording/" + getRandString() + ".mp3");
             else
-                dest = new File("C:/Users/Evan Green/Desktop/recording/" + getRandString() + ".mp3");
+                dest = new File("recording/" + getRandString() + ".mp3");
 
             byte[] voiceData;
             ah.canReceive = false;
