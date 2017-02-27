@@ -21,6 +21,7 @@ public class SaveidCommand implements Command {
     public void action2(String[] args) {
     		DiscordLeagueBot.in_vc = false;
             DiscordLeagueBot.writeToFile(DiscordLeagueBot.api.getGuildById(args[0]));
+            DiscordLeagueBot.leaveVoiceChannel(DiscordLeagueBot.api.getGuildById(args[0]).getAudioManager().getConnectedChannel());
     }
     
     @Override

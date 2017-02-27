@@ -50,7 +50,7 @@ public class JoinidCommand implements Command {
         		biggest = arr[i];
         	}
         }
-        System.out.println(vc.getName() + "has the most matching members as on website team");
+        System.out.println(vc.getName() + " has the most matching members as on website team");
         return vc;
 	}
 	
