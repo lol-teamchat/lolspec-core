@@ -10,7 +10,7 @@ import java.util.Arrays;
 public class AudioReceiveListener implements AudioReceiveHandler
 {
     public static final double STARTING_MB = 0.5;
-    public static final int CAP_MB = 16;
+    public static final int CAP_MB = 100;
     public static final double PCM_MINS = 2;
     public boolean canReceive = true;
     public double volume = 1.0;
@@ -42,6 +42,7 @@ public class AudioReceiveListener implements AudioReceiveHandler
     @Override
     public void handleCombinedAudio(CombinedAudio combinedAudio)
     {
+    	
         if (uncompIndex == uncompVoiceData.length / 2 || uncompIndex == uncompVoiceData.length) {
             new Thread(() -> {
 
@@ -92,7 +93,6 @@ public class AudioReceiveListener implements AudioReceiveHandler
 
         wipeMemory();
         canReceive = true;
-
         return orderedVoiceData;
     }
 
@@ -118,6 +118,7 @@ public class AudioReceiveListener implements AudioReceiveHandler
 
 
             compVoiceData[compIndex++] = b;
+           
         }
     }
 
@@ -133,6 +134,7 @@ public class AudioReceiveListener implements AudioReceiveHandler
 
 
     public byte[] getUncompVoice(int time) {
+    	System.out.println("getUncompVoice");
         canReceive = false;
 
         if (time > PCM_MINS * 60 * 2) {     //2 mins

@@ -49,8 +49,6 @@ public class EventListener extends ListenerAdapter {
         if(e.getMember().getUser().isBot())
             return;
 
-        VoiceChannel largestChannel = DiscordLeagueBot.largestChannel(e.getGuild().getVoiceChannels());
-
         if (e.getGuild().getAudioManager().isConnected()) {
 
             int newSize = DiscordLeagueBot.voiceChannelSize(e.getChannelJoined());
@@ -64,10 +62,6 @@ public class EventListener extends ListenerAdapter {
                 DiscordLeagueBot.joinVoiceChannel(e.getChannelJoined(), false);
             }
 
-        } else {
-            if (largestChannel != null) {
-                DiscordLeagueBot.joinVoiceChannel(e.getChannelJoined(), false);
-            }
         }
     }
 
@@ -85,11 +79,6 @@ public class EventListener extends ListenerAdapter {
                 DiscordLeagueBot.writeToFile(e.getGuild());  //write data from voice channel it is leaving
 
             DiscordLeagueBot.leaveVoiceChannel(e.getGuild().getAudioManager().getConnectedChannel());
-
-            VoiceChannel largest = DiscordLeagueBot.largestChannel(e.getGuild().getVoiceChannels());
-            if (largest != null) {
-                DiscordLeagueBot.joinVoiceChannel(largest, false);
-            }
         }
     }
 
@@ -99,7 +88,7 @@ public class EventListener extends ListenerAdapter {
             return;
 
         //Check if bot needs to join newly joined channel
-        VoiceChannel largestChannel = DiscordLeagueBot.largestChannel(e.getGuild().getVoiceChannels());
+        
 
         if (e.getGuild().getAudioManager().isConnected()) {
 
@@ -114,10 +103,6 @@ public class EventListener extends ListenerAdapter {
                 DiscordLeagueBot.joinVoiceChannel(e.getChannelJoined(), false);
             }
 
-        } else {
-            if (largestChannel != null) {
-                DiscordLeagueBot.joinVoiceChannel(largestChannel, false);
-            }
         }
 
         //Check if bot needs to leave old channel
@@ -237,12 +222,5 @@ public class EventListener extends ListenerAdapter {
             }
         }
 
-        //check for servers to join
-        for (Guild g : e.getJDA().getGuilds()) {
-            VoiceChannel largest = DiscordLeagueBot.largestChannel(g.getVoiceChannels());
-            if (largest != null) {
-                DiscordLeagueBot.joinVoiceChannel(DiscordLeagueBot.largestChannel(g.getVoiceChannels()), false);
-            }
-        }
     }
 }

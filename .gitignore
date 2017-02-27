@@ -1,6 +1,6 @@
-lol-ob
-server/node_modules
-server/config.json
+/node_modules
+/lol-ob
+config.json
 discordleaguebotv1/token_loc
 discordleaguebotv1/settings.json
 discordleaguebotv1/bin/
@@ -8,8 +8,8 @@ discordleaguebotv1/recordings/
 .metadata/
 .recommenders/
 discordleaguebotv1/.settings/
+discordleaguebotv1/.metadata/
 discordleaguebotv1/.classpath
 discordleaguebotv1/.project
-audiosync/*.db
-audiosync/*.opendb
-audiosync/Debug
+discordleaguebotv1/names
+discordleaguebotv1/LeagueReplay.jardesc
