@@ -1,5 +1,5 @@
 console.log('plugin.js loaded...');
-
+/*
 // create an instance of the plugin
 var plugin = new OverwolfPlugin("InGameProbability", true);
 
@@ -17,7 +17,7 @@ plugin.initialize(function(status) {
         console.log(message);
     });
 });
-/*
+
 console.log('plugin initialize called...');
 
 function registerEvents()   {

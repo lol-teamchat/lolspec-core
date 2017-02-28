@@ -16,6 +16,7 @@ discordleaguebotv1/LeagueReplay.jardesc
 audiosync/*.db
 audiosync/*.opendb
 audiosync/Debug
+audiosync/ipch/
 token_loc
 names
 LeagueReplayComplete.jar

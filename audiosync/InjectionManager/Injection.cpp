@@ -1,235 +1,128 @@
-#include <Windows.h>
+// 32-bit injection unmanaged DLL injection
+
 #include <iostream>
-#include <TlHelp32.h>
-#include <stdlib.h>
-#include <string>
+#include <direct.h>
+#include <windows.h>
+#include <tlhelp32.h>
 
-#include "Injection.h"
-#include "HCommonEnsureCleanup.h"
+#include "stdafx.h"
 
-BOOL InjectAndRunThenUnload(DWORD ProcessId, const char * DllName, const std::string& ExportName, const wchar_t * ExportArgument)
+using namespace std;
+
+char* GetCurrentDir()
 {
-	using namespace Hades;
-	using namespace std;
-
-	// This doesn't need to be freed
-	HMODULE hKernel32 = GetModuleHandle(L"kernel32.dll");
-
-	if (!ProcessId)
-	{
-		cout << "Specified Process not found" << endl;
-		return false;
-	}
-
-	EnsureCloseHandle Proc = OpenProcess(PROCESS_ALL_ACCESS, FALSE, ProcessId);
-
-	if (!Proc)
-	{
-		cout << "Process found, but OpenProcess() failed: " << GetLastError() << endl;
-		return false;
-	}
-
-	// LoadLibraryA needs a string as its argument, but it needs to be in
-	// the remote Process' memory space.
-	size_t StrLength = strlen(DllName);
-	LPVOID RemoteString = (LPVOID)VirtualAllocEx(Proc, NULL, StrLength,
-		MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE);
-	WriteProcessMemory(Proc, RemoteString, DllName, StrLength, NULL);
-
-	// Start a remote thread on the targeted Process, using LoadLibraryA
-	// as our entry point to load a custom dll. (The A is for Ansi)
-	EnsureCloseHandle LoadThread = CreateRemoteThread(Proc, NULL, NULL,
-		(LPTHREAD_START_ROUTINE)GetProcAddress(hKernel32, "LoadLibraryA"),
-		RemoteString, NULL, NULL);
-	WaitForSingleObject(LoadThread, INFINITE);
-
-	// Get the handle of the now loaded module
-	DWORD hLibModule;
-	GetExitCodeThread(LoadThread, &hLibModule);
-
-	// Clean up the remote string
-	VirtualFreeEx(Proc, RemoteString, 0, MEM_RELEASE);
-
-	// Call the function we wanted in the first place
-	CallExport(ProcessId, DllName, ExportName, ExportArgument);
-
-	//// Unload the dll, so we can run again if we choose
-	//EnsureCloseHandle FreeThread = CreateRemoteThread(Proc, NULL, NULL,
-	//	(LPTHREAD_START_ROUTINE)GetProcAddress(hKernel32, "FreeLibrary"),
-	//	(LPVOID)hLibModule, NULL, NULL);
-	//WaitForSingleObject(FreeThread, INFINITE);
-
-	return true;
+	char* szRet = (char*)malloc(MAX_PATH);
+	_getcwd(szRet, MAX_PATH);
+	return szRet;
 }
 
-DWORD CallExport(DWORD ProcId, const std::string& ModuleName, const std::string& ExportName, const wchar_t * ExportArgument)
+LPCTSTR SzToLPCTSTR(char* szString)
 {
-	using namespace Hades;
-	using namespace std;
+	LPTSTR lpszRet;
+	size_t size = strlen(szString)+1;
 
-	// Grab a new Snapshot of the process
-	EnsureCloseHandle Snapshot(CreateToolhelp32Snapshot(TH32CS_SNAPMODULE, ProcId));
-	if (Snapshot == INVALID_HANDLE_VALUE)
-	{
-		cout << "CallExport: Could not get module Snapshot for remote process." << endl;
-		return NULL;
-	}
+	lpszRet = (LPTSTR)malloc(MAX_PATH);
+	mbstowcs_s(NULL, lpszRet, size, szString, _TRUNCATE);
 
-	// Get the ModuleEntry structure of the desired library
-	MODULEENTRY32W ModEntry = { sizeof(ModEntry) };
-	bool Found = false;
-	BOOL bMoreMods = Module32FirstW(Snapshot, &ModEntry);
-	for (; bMoreMods; bMoreMods = Module32NextW(Snapshot, &ModEntry))
-	{
-		wstring ExePath(ModEntry.szExePath);
-		wstring ModuleTmp(ModuleName.begin(), ModuleName.end());
-		// For debug
-		wcout << ExePath << endl;
-		Found = (ExePath == ModuleTmp);
-		if (Found)
-			break;
-	}
-	if (!Found)
-	{
-		cout << "CallExport: Could not find module in remote process." << endl;
-		return NULL;
-	}
-
-	// Get module base address
-	PBYTE ModuleBase = ModEntry.modBaseAddr;
-
-	// Get a handle for the target process
-	EnsureCloseHandle TargetProcess(OpenProcess(
-		PROCESS_QUERY_INFORMATION |
-		PROCESS_CREATE_THREAD |
-		PROCESS_VM_OPERATION |
-		PROCESS_VM_READ,
-		FALSE, ProcId));
-	if (!TargetProcess)
-	{
-		cout << "CallExport: Could not get handle to process." << endl;
-		return NULL;
-	}
-
-	// Load module as data so we can read the export address table (EAT) locally.
-	EnsureFreeLibrary MyModule(LoadLibraryExA(ModuleName.c_str(), NULL,
-		DONT_RESOLVE_DLL_REFERENCES));
-
-	// Get module pointer
-	PVOID Module = static_cast<PVOID>(MyModule);
-
-	// Get pointer to DOS header
-	PIMAGE_DOS_HEADER pDosHeader = reinterpret_cast<PIMAGE_DOS_HEADER>(
-		static_cast<HMODULE>(Module));
-	if (!pDosHeader || pDosHeader->e_magic != IMAGE_DOS_SIGNATURE)
-	{
-		cout << "CallExport: DOS PE header is invalid." << endl;
-		return NULL;
-	}
-
-	// Get pointer to NT header
-	PIMAGE_NT_HEADERS pNtHeader = reinterpret_cast<PIMAGE_NT_HEADERS>(
-		reinterpret_cast<PCHAR>(Module) + pDosHeader->e_lfanew);
-	if (pNtHeader->Signature != IMAGE_NT_SIGNATURE)
-	{
-		cout << "CallExport: NT PE header is invalid." << endl;
-		return NULL;
-	}
-
-	// Get pointer to image export directory
-	PVOID pExportDirTemp = reinterpret_cast<PBYTE>(Module) +
-		pNtHeader->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].
-		VirtualAddress;
-	PIMAGE_EXPORT_DIRECTORY pExportDir =
-		reinterpret_cast<PIMAGE_EXPORT_DIRECTORY>(pExportDirTemp);
-
-	// Symbol names could be missing entirely
-	if (pExportDir->AddressOfNames == NULL)
-	{
-		cout << "CallExport: Symbol names missing entirely." << endl;
-		return NULL;
-	}
-
-	// Get pointer to export names table, ordinal table, and address table
-	PDWORD pNamesRvas = reinterpret_cast<PDWORD>(
-		reinterpret_cast<PBYTE>(Module) + pExportDir->AddressOfNames);
-	PWORD pNameOrdinals = reinterpret_cast<PWORD>(
-		reinterpret_cast<PBYTE>(Module) + pExportDir->AddressOfNameOrdinals);
-	PDWORD pFunctionAddresses = reinterpret_cast<PDWORD>(
-		reinterpret_cast<PBYTE>(Module) + pExportDir->AddressOfFunctions);
-
-	// Variable to hold the export address
-	FARPROC pExportAddr = 0;
-
-	// Walk the array of this module's function names
-	for (DWORD n = 0; n < pExportDir->NumberOfNames; n++)
-	{
-		// Get the function name
-		PSTR CurrentName = reinterpret_cast<PSTR>(
-			reinterpret_cast<PBYTE>(Module) + pNamesRvas[n]);
-
-		// If not the specified function, try the next one
-		if (ExportName != CurrentName) continue;
-
-		// We found the specified function
-		// Get this function's Ordinal value
-		WORD Ordinal = pNameOrdinals[n];
-
-		// Get the address of this function's address
-		pExportAddr = reinterpret_cast<FARPROC>(reinterpret_cast<PBYTE>(Module)
-			+ pFunctionAddresses[Ordinal]);
-
-		// We got the func. Break out.
-		break;
-	}
-
-	// Nothing found, throw exception
-	if (!pExportAddr)
-	{
-		cout << "CallExport: Could not find " << ExportName << "." << endl;
-		return NULL;
-	}
-
-	// Convert local address to remote address
-	PTHREAD_START_ROUTINE pfnThreadRtn =
-		reinterpret_cast<PTHREAD_START_ROUTINE>((reinterpret_cast<DWORD_PTR>(
-			pExportAddr) - reinterpret_cast<DWORD_PTR>(Module)) +
-			reinterpret_cast<DWORD_PTR>(ModuleBase));
-
-	// Open the process so we can create the remote string
-	EnsureCloseHandle Proc = OpenProcess(PROCESS_ALL_ACCESS, FALSE, ProcId);
-
-	// Copy the string argument over to the remote process
-	size_t StrNumBytes = wcslen(ExportArgument) * sizeof(wchar_t);
-	LPVOID RemoteString = (LPVOID)VirtualAllocEx(Proc, NULL, StrNumBytes,
-		MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE);
-	WriteProcessMemory(Proc, RemoteString, ExportArgument, StrNumBytes, NULL);
-
-	// Create a remote thread that calls the desired export
-	EnsureCloseHandle Thread = CreateRemoteThread(TargetProcess, NULL, NULL,
-		(LPTHREAD_START_ROUTINE)pfnThreadRtn, RemoteString, NULL, NULL);
-	if (!Thread)
-	{
-		cout << "CallExport: Could not create thread in remote process." << endl;
-		return NULL;
-	}
-
-	// Wait for the remote thread to terminate
-	WaitForSingleObject(Thread, INFINITE);
-
-	// Get thread exit code
-	DWORD ExitCode = 0;
-	if (!GetExitCodeThread(Thread, &ExitCode))
-	{
-		cout << "CallExport: Could not get thread exit code." << endl;
-		return NULL;
-	}
-
-	// Return thread exit code
-	return ExitCode;
+	return lpszRet;
 }
 
-int main() {
-	InjectAndRunThenUnload(1212, "ExampleProject.dll", "EntryPoint", L"");
-	return 0;
+void WaitForProcessToAppear(LPCTSTR lpczProc, DWORD dwDelay)
+{
+	HANDLE			hSnap;
+	PROCESSENTRY32	peProc;
+	BOOL			bAppeared = FALSE;
+
+	while (!bAppeared)
+	{
+		if ((hSnap = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0)) != INVALID_HANDLE_VALUE)
+		{
+			peProc.dwSize = sizeof(PROCESSENTRY32);
+			if (Process32First(hSnap, &peProc))
+				while (Process32Next(hSnap, &peProc) && !bAppeared)
+					if (!lstrcmp(lpczProc, peProc.szExeFile))
+						bAppeared = TRUE;
+		}
+		CloseHandle(hSnap);
+		Sleep(dwDelay);
+	}
+	cout << "process appeared" << endl;
+}
+
+DWORD GetProcessIdByName(LPCTSTR lpczProc)
+{
+	HANDLE			hSnap;
+	PROCESSENTRY32	peProc;
+	DWORD			dwRet = -1;
+
+	if ((hSnap = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0)) != INVALID_HANDLE_VALUE)
+	{
+		peProc.dwSize = sizeof(PROCESSENTRY32);
+		if (Process32First(hSnap, &peProc))
+			while (Process32Next(hSnap, &peProc))
+				if (!lstrcmp(lpczProc, peProc.szExeFile))
+					dwRet = peProc.th32ProcessID;
+	}
+	CloseHandle(hSnap);
+
+	return dwRet;
+}
+
+BOOL InjectDll(DWORD dwPid, char* szDllPath)
+{
+	DWORD	dwMemSize;
+	HANDLE	hProc;
+	LPVOID	lpRemoteMem, lpLoadLibrary;
+	BOOL	bRet = FALSE;
+
+	if ((hProc = OpenProcess(PROCESS_VM_OPERATION | PROCESS_VM_WRITE | PROCESS_CREATE_THREAD, FALSE, dwPid)) != NULL)
+	{
+		dwMemSize = strlen(szDllPath) + 1;
+		if ((lpRemoteMem = VirtualAllocEx(hProc, NULL, dwMemSize, MEM_COMMIT, PAGE_READWRITE)) != NULL)
+			if (WriteProcessMemory(hProc, lpRemoteMem, (LPCVOID)szDllPath, dwMemSize, NULL))
+			{
+				lpLoadLibrary = GetProcAddress(GetModuleHandleA("Kernel32.dll"), "LoadLibraryA");
+				if (CreateRemoteThread(hProc, NULL, 0, (LPTHREAD_START_ROUTINE)lpLoadLibrary, lpRemoteMem, 0, NULL) != NULL)
+					bRet = TRUE;
+			}
+	}
+	CloseHandle(hProc);
+
+	return bRet;
+}
+
+int main(void)
+{
+	char szProc[MAX_PATH];
+	char szDll[MAX_PATH];
+
+	char*   szDllPath;
+	LPTSTR	lpszProc = NULL;
+
+	char lolstr[] = "League of Legends.exe";
+	char dllstr[] = "LeagueReplayHook.dll";
+	strcpy_s(szProc, lolstr);
+	strcpy_s(szDll, dllstr);
+
+	cout << "process name: " << szProc << endl;
+	cout << "dll name: " << dllstr << endl;
+
+	szDllPath = GetCurrentDir();
+	strcat_s(szDllPath, MAX_PATH, "\\");
+	strcat_s(szDllPath, MAX_PATH, szDll);
+
+	cout << "waiting for league of legends to start" << endl;
+
+	WaitForProcessToAppear(SzToLPCTSTR(szProc), 100);
+
+	if (InjectDll(GetProcessIdByName(SzToLPCTSTR(szProc)), szDllPath))
+		cout << "success" << endl;
+	else
+		cout << "fail" << endl;
+	cout << "\n";
+
+	free(szDllPath);
+
+
+	return EXIT_SUCCESS;
 }
