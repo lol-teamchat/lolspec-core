@@ -4,20 +4,23 @@
 #include <direct.h>
 #include <windows.h>
 #include <tlhelp32.h>
-
+#include "Injection.h"
 #include "stdafx.h"
 
-using namespace std;
+using namespace Injection;
 
-char* GetCurrentDir()
-{
+// need to explicitly define constructor otherwise there is a link error
+Injector::Injector() {
+
+}
+
+char* Injector::GetCurrentDir() {
 	char* szRet = (char*)malloc(MAX_PATH);
 	_getcwd(szRet, MAX_PATH);
 	return szRet;
 }
 
-LPCTSTR SzToLPCTSTR(char* szString)
-{
+LPCTSTR Injector::SzToLPCTSTR(char* szString) {
 	LPTSTR lpszRet;
 	size_t size = strlen(szString)+1;
 
@@ -27,8 +30,7 @@ LPCTSTR SzToLPCTSTR(char* szString)
 	return lpszRet;
 }
 
-void WaitForProcessToAppear(LPCTSTR lpczProc, DWORD dwDelay)
-{
+void Injector::WaitForProcessToAppear(LPCTSTR lpczProc, DWORD dwDelay) {
 	HANDLE			hSnap;
 	PROCESSENTRY32	peProc;
 	BOOL			bAppeared = FALSE;
@@ -46,11 +48,10 @@ void WaitForProcessToAppear(LPCTSTR lpczProc, DWORD dwDelay)
 		CloseHandle(hSnap);
 		Sleep(dwDelay);
 	}
-	cout << "process appeared" << endl;
+	//std::cout << "process appeared" << std::endl;
 }
 
-DWORD GetProcessIdByName(LPCTSTR lpczProc)
-{
+DWORD Injector::GetProcessIdByName(LPCTSTR lpczProc) {
 	HANDLE			hSnap;
 	PROCESSENTRY32	peProc;
 	DWORD			dwRet = -1;
@@ -68,8 +69,7 @@ DWORD GetProcessIdByName(LPCTSTR lpczProc)
 	return dwRet;
 }
 
-BOOL InjectDll(DWORD dwPid, char* szDllPath)
-{
+BOOL Injector::InjectDll(DWORD dwPid, char* szDllPath) {
 	DWORD	dwMemSize;
 	HANDLE	hProc;
 	LPVOID	lpRemoteMem, lpLoadLibrary;
@@ -77,6 +77,7 @@ BOOL InjectDll(DWORD dwPid, char* szDllPath)
 
 	if ((hProc = OpenProcess(PROCESS_VM_OPERATION | PROCESS_VM_WRITE | PROCESS_CREATE_THREAD, FALSE, dwPid)) != NULL)
 	{
+		// potential loss of data -> need to rework this area
 		dwMemSize = strlen(szDllPath) + 1;
 		if ((lpRemoteMem = VirtualAllocEx(hProc, NULL, dwMemSize, MEM_COMMIT, PAGE_READWRITE)) != NULL)
 			if (WriteProcessMemory(hProc, lpRemoteMem, (LPCVOID)szDllPath, dwMemSize, NULL))
@@ -91,38 +92,55 @@ BOOL InjectDll(DWORD dwPid, char* szDllPath)
 	return bRet;
 }
 
-int main(void)
-{
-	char szProc[MAX_PATH];
-	char szDll[MAX_PATH];
+// TODO
+BOOL Injector::Inject(System::String^ processName, System::String^ dllName) {
+	
 
-	char*   szDllPath;
-	LPTSTR	lpszProc = NULL;
+	// maybe change first argument to uint for processId then call
+	// another function to inject
 
-	char lolstr[] = "League of Legends.exe";
-	char dllstr[] = "LeagueReplayHook.dll";
-	strcpy_s(szProc, lolstr);
-	strcpy_s(szDll, dllstr);
-
-	cout << "process name: " << szProc << endl;
-	cout << "dll name: " << dllstr << endl;
-
-	szDllPath = GetCurrentDir();
-	strcat_s(szDllPath, MAX_PATH, "\\");
-	strcat_s(szDllPath, MAX_PATH, szDll);
-
-	cout << "waiting for league of legends to start" << endl;
-
-	WaitForProcessToAppear(SzToLPCTSTR(szProc), 100);
-
-	if (InjectDll(GetProcessIdByName(SzToLPCTSTR(szProc)), szDllPath))
-		cout << "success" << endl;
-	else
-		cout << "fail" << endl;
-	cout << "\n";
-
-	free(szDllPath);
+	// convert processName to LPCTSTR
+	// get current path and concatenate the dllName to it
+	// convert dllPath to char*
+	// call InjectDll
 
 
-	return EXIT_SUCCESS;
+	// TODO
+	return false;
+
 }
+
+//int main(void) {
+//	char szProc[MAX_PATH];
+//	char szDll[MAX_PATH];
+//
+//	char*   szDllPath;
+//	LPTSTR	lpszProc = NULL;
+//
+//	char lolstr[] = "League of Legends.exe";
+//	char dllstr[] = "LeagueReplayHook.dll";
+//	strcpy_s(szProc, lolstr);
+//	strcpy_s(szDll, dllstr);
+//
+//	cout << "process name: " << szProc << endl;
+//	cout << "dll name: " << dllstr << endl;
+//
+//	szDllPath = GetCurrentDir();
+//	strcat_s(szDllPath, MAX_PATH, "\\");
+//	strcat_s(szDllPath, MAX_PATH, szDll);
+//
+//	cout << "waiting for league of legends to start" << endl;
+//
+//	WaitForProcessToAppear(SzToLPCTSTR(szProc), 100);
+//
+//	if (InjectDll(GetProcessIdByName(SzToLPCTSTR(szProc)), szDllPath))
+//		cout << "success" << endl;
+//	else
+//		cout << "fail" << endl;
+//	cout << "\n";
+//
+//	free(szDllPath);
+//
+//
+//	return EXIT_SUCCESS;
+//}

@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace audiosync {
+
     static class LeagueInjector {
         //InjectionManager.Inject(int processId, string dllName);
 
@@ -50,11 +51,9 @@ namespace audiosync {
             System.Console.WriteLine(processes[0].ToString() + ", id:" + processId);
 
             // Do actual injection TODO
-            
 
-
-            //return InjectionManager.Injector.Inject(processId, dllName);        
-            return true;
+            var injector = new Injection.Injector();
+            return (injector.Inject(leagueProcess.ToString(), dllName) == 1) ? true : false;
         }    
         private static string GetCommandLine(this Process process) {
             var commandLine = new StringBuilder(process.MainModule.FileName);
