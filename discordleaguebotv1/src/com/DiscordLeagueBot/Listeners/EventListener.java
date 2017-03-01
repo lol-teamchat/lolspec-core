@@ -204,7 +204,7 @@ public class EventListener extends ListenerAdapter {
                 DiscordLeagueBot.writeSettingsJson();
             }
         }
-
+/*
         File dir = new File("recording/");
         if (!dir.exists())
             dir = new File("recording/");
@@ -221,6 +221,8 @@ public class EventListener extends ListenerAdapter {
                 }).start();
             }
         }
+        
+        */
 
     }
 }

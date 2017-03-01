@@ -11,7 +11,8 @@ public class AudioReceiveListener implements AudioReceiveHandler
 {
     public static final double STARTING_MB = 0.5;
     public static final int CAP_MB = 100;
-    public static final double PCM_MINS = 2;
+    //orig 2, start mb 0.5
+    public static final double PCM_MINS = 0.1;
     public boolean canReceive = true;
     public double volume = 1.0;
 
