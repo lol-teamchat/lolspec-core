@@ -1,6 +1,12 @@
 ﻿<!DOCTYPE html>
 <html>
 	<head>
+		<script>
+			if (location.href.indexOf('gamelaunchevent') == -1) {
+				overwolf.utils.openUrlInDefaultBrowser("http://xddddd.ddns.net/lolspec/");
+				window.close();
+			}
+		</script>
 		<link rel="stylesheet" href="style.css" />
 		<meta content="text/html; charset=utf-8" http-equiv="Content-Type">
 		<title>LoL Spectate</title>
@@ -16,8 +22,7 @@
 		    <hr>
 		    <div id="messages"></div>
 		</div>
-		<!-- <audio class="audioDemo" oncanplaythrough="setTimeout(myOnCanPlayThrough, 1000)"
-			src="maonbass.mp3" type="audio/mpeg">
+		<!-- <audio class="audioDemo" controls oncanplay="console.log('ready to play')" src="http://xddddd.ddns.net/lolspec/uKTtTpLHnDv5O.mp3" type="audio/mpeg">
 		</audio> -->
 		<!-- <script>
 			// logging

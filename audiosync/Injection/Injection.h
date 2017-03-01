@@ -11,13 +11,10 @@ namespace Injection {
 	public ref class Injector {
 		public:
 			Injector();
-			BOOL Inject(System::String^ processName, System::String^ dllName);
+			BOOL Inject(int pid, System::String^ dllPath);
 		private: 
 			BOOL InjectDll(DWORD dwPid, char * szDllPath);
-			char * GetCurrentDir();
 			LPCTSTR SzToLPCTSTR(char * szString);
-			void WaitForProcessToAppear(LPCTSTR lpczProc, DWORD dwDelay);
-			DWORD GetProcessIdByName(LPCTSTR lpczProc);
 	};
 	
 }

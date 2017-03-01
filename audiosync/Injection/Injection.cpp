@@ -7,17 +7,12 @@
 #include "Injection.h"
 #include "stdafx.h"
 
+using namespace System::Runtime::InteropServices;
 using namespace Injection;
 
 // need to explicitly define constructor otherwise there is a link error
 Injector::Injector() {
 
-}
-
-char* Injector::GetCurrentDir() {
-	char* szRet = (char*)malloc(MAX_PATH);
-	_getcwd(szRet, MAX_PATH);
-	return szRet;
 }
 
 LPCTSTR Injector::SzToLPCTSTR(char* szString) {
@@ -28,45 +23,6 @@ LPCTSTR Injector::SzToLPCTSTR(char* szString) {
 	mbstowcs_s(NULL, lpszRet, size, szString, _TRUNCATE);
 
 	return lpszRet;
-}
-
-void Injector::WaitForProcessToAppear(LPCTSTR lpczProc, DWORD dwDelay) {
-	HANDLE			hSnap;
-	PROCESSENTRY32	peProc;
-	BOOL			bAppeared = FALSE;
-
-	while (!bAppeared)
-	{
-		if ((hSnap = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0)) != INVALID_HANDLE_VALUE)
-		{
-			peProc.dwSize = sizeof(PROCESSENTRY32);
-			if (Process32First(hSnap, &peProc))
-				while (Process32Next(hSnap, &peProc) && !bAppeared)
-					if (!lstrcmp(lpczProc, peProc.szExeFile))
-						bAppeared = TRUE;
-		}
-		CloseHandle(hSnap);
-		Sleep(dwDelay);
-	}
-	//std::cout << "process appeared" << std::endl;
-}
-
-DWORD Injector::GetProcessIdByName(LPCTSTR lpczProc) {
-	HANDLE			hSnap;
-	PROCESSENTRY32	peProc;
-	DWORD			dwRet = -1;
-
-	if ((hSnap = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0)) != INVALID_HANDLE_VALUE)
-	{
-		peProc.dwSize = sizeof(PROCESSENTRY32);
-		if (Process32First(hSnap, &peProc))
-			while (Process32Next(hSnap, &peProc))
-				if (!lstrcmp(lpczProc, peProc.szExeFile))
-					dwRet = peProc.th32ProcessID;
-	}
-	CloseHandle(hSnap);
-
-	return dwRet;
 }
 
 BOOL Injector::InjectDll(DWORD dwPid, char* szDllPath) {
@@ -92,55 +48,29 @@ BOOL Injector::InjectDll(DWORD dwPid, char* szDllPath) {
 	return bRet;
 }
 
-// TODO
-BOOL Injector::Inject(System::String^ processName, System::String^ dllName) {
+// CLR Wrapper inject
+BOOL Injector::Inject(int pid, System::String^ dllPath) {
 	
+	char * szDllPath;
+	szDllPath = (char*)(void*)Marshal::StringToHGlobalAnsi(dllPath);
+// Debug message to make sure DLL path is correct
+#ifdef _DEBUG
+	MessageBox(
+		0,
+		SzToLPCTSTR(szDllPath),
+		L"dll path",
+		MB_DEFBUTTON1
+	);
+	MessageBox(
+		0,
+		SzToLPCTSTR((char *)(void*)Marshal::StringToHGlobalAnsi(pid.ToString())),
+		L"league of legends.exe pid",
+		MB_DEFBUTTON1
+	);
+#endif
+	
+	DWORD dwPid = static_cast<DWORD>(pid);
+	return InjectDll(dwPid, szDllPath);
 
-	// maybe change first argument to uint for processId then call
-	// another function to inject
-
-	// convert processName to LPCTSTR
-	// get current path and concatenate the dllName to it
-	// convert dllPath to char*
-	// call InjectDll
-
-
-	// TODO
-	return false;
 
 }
-
-//int main(void) {
-//	char szProc[MAX_PATH];
-//	char szDll[MAX_PATH];
-//
-//	char*   szDllPath;
-//	LPTSTR	lpszProc = NULL;
-//
-//	char lolstr[] = "League of Legends.exe";
-//	char dllstr[] = "LeagueReplayHook.dll";
-//	strcpy_s(szProc, lolstr);
-//	strcpy_s(szDll, dllstr);
-//
-//	cout << "process name: " << szProc << endl;
-//	cout << "dll name: " << dllstr << endl;
-//
-//	szDllPath = GetCurrentDir();
-//	strcat_s(szDllPath, MAX_PATH, "\\");
-//	strcat_s(szDllPath, MAX_PATH, szDll);
-//
-//	cout << "waiting for league of legends to start" << endl;
-//
-//	WaitForProcessToAppear(SzToLPCTSTR(szProc), 100);
-//
-//	if (InjectDll(GetProcessIdByName(SzToLPCTSTR(szProc)), szDllPath))
-//		cout << "success" << endl;
-//	else
-//		cout << "fail" << endl;
-//	cout << "\n";
-//
-//	free(szDllPath);
-//
-//
-//	return EXIT_SUCCESS;
-//}

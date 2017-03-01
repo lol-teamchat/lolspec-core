@@ -41,9 +41,9 @@
       }
     ],
 	"extra-objects": {
-		"testplugin": {
-          "file": "test-plugin.dll",
-          "class": "test_plugin.EntryPoint"
+		"audiosync": {
+          "file": "plugins/audiosync.dll",
+          "class": "audiosync.Audiosync"
         }
     }
   }

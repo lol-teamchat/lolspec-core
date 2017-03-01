@@ -47,13 +47,13 @@ namespace audiosync {
                 return false;
             }
 
-            var processId = processes[0].Id;
-            System.Console.WriteLine(processes[0].ToString() + ", id:" + processId);
+            int pid = leagueProcess.Id;
+            System.Console.WriteLine(processes[0].ToString() + ", id:" + pid.GetType());
 
             // Do actual injection TODO
 
             var injector = new Injection.Injector();
-            return (injector.Inject(leagueProcess.ToString(), dllName) == 1) ? true : false;
+            return (injector.Inject(pid, dllName) == 1) ? true : false;
         }    
         private static string GetCommandLine(this Process process) {
             var commandLine = new StringBuilder(process.MainModule.FileName);
