@@ -8,12 +8,13 @@ namespace audiosync {
     using System.Net;
     using System.Net.Sockets;
     using System.Text;
-    using System.Threading;
 
     internal class Listener {
         private readonly UdpClient _client;
         private IPEndPoint _ipep;
         private string lastMessage;
+        private bool stop;
+        private List<Action<object>> callbacks;
 
         public Listener(int port) {
 
@@ -21,6 +22,8 @@ namespace audiosync {
                 this._client = new UdpClient(port);
                 this._ipep = new IPEndPoint(IPAddress.Any, port);
                 lastMessage = "";
+                stop = false;
+                callbacks = new List<Action<object>>();
                 startListening();
 
             }
@@ -30,22 +33,29 @@ namespace audiosync {
         }
 
         private void startListening() {
-            new Thread(() => {
-                while (true) {
-
+            new Task(() => {
+                while (!stop) {                    
                     string msg = getMessage();
+                    Console.Error.WriteLine(msg);
                     // a different message is received
                     if (msg != null && lastMessage != msg) {
                         lastMessage = msg;
 
                         // handle event updates and triggers TODO
-
-                    }
-
-                    // sleep for 1 ms
-                    Thread.Sleep(1);
+                        foreach (Action<object> cb in callbacks) {
+                            cb(lastMessage);
+                        }
+                    }                  
                 }
             }).Start();            
+        }
+
+        private void stopListening() {
+            stop = true;
+        }
+
+        public void add(Action<object> cb) {
+            callbacks.Add(cb);            
         }
 
         private string getMessage() {

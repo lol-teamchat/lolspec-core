@@ -38,10 +38,10 @@ audiosync.initialize(function(status) {
 	//
 	// })
 	$('body').append('<audio class="audioDemo" controls oncanplay="console.log(\'ready to play\')" src="http://xddddd.ddns.net/lolspec/2uKTtTpLHnDv5O.mp3"></audio>');
-	// audiosync.get().timeSeek.addListener(function(newtime) {
-	// 	// seeked to a new time, readjust audio accordingly
-	//
-	// })
+	audiosync.get().onTimeSeek.addListener(function(newtime) {
+		console.log("timeseek", newtime);
+		$('.audioDemo')[0].currentTime = offset + newtime;
+	})
 });
 
 /*
@@ -66,12 +66,6 @@ plugin.initialize(function(status) {
 
 });
 */
-
-// onNewEvents dont appear in league of legends replays for some reason
-// overwolf.games.events.onNewEvents.addListener(function(newEvents) {
-// 	console.log("new events");
-// 	console.log(newEvents);
-// })
 
 // which features we are interested in receiving from the provider
 var features = [
@@ -104,7 +98,7 @@ function setFeatures(numRetries) {
 }
 setFeatures(1);
 
-var replayBegan = 1488340510000;
+var replayBegan = 1488340509000;
 var audioBegan = Date.parse("2017-02-28T19:53:38.306-08:00");
 var offsetMillis = replayBegan-audioBegan;
 var offset = offsetMillis/1000 + 60;

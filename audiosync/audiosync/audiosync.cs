@@ -23,13 +23,11 @@ namespace audiosync
             dllPath = $"{Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)}\\{dll}";
             if (LeagueInjector.Inject(dllPath) == false) {
                 Logger.setError("failed to inject " + dll);
-                //return;
             }
-
             // listens for udp data
             listener = new Listener(listen_port);
             // triggers events when listened data becomes out of sync
-            sync = new Synchronizer(listener);
+            sync = new Synchronizer(listener, triggerTimeSeek);
         }
 
         // getUIMessage(callback(success, message));
@@ -75,18 +73,21 @@ namespace audiosync
 
         public void setMatchStartTime(double currentTimeStamp, Action<object> callback) {
             // tell the synchronizer what time should be synced
+            triggerTimeSeek("1");
+            triggerTimeSeek("2");
+            triggerTimeSeek("3");
             sync.setStartTime(currentTimeStamp);
-            callback("set start time to: " + currentTimeStamp);
+            callback("game start time at " + currentTimeStamp);
 
             //MessageBox.Show("currentTimeStamp= " + currentTimeStamp, null, MessageBoxButtons.OK);
         }
 
+        // updates callback whenever a timeSeek action occurs
+        // audiosync.get().onTimeSeek.addListener(function(time) { 
+        public event Action<object> onTimeSeek;
 
-        // updates callback whenever a timeSeek action occurs 
-        public void timeSeek(Action<object> callback) { // TODO         
-            if (callback == null) {
-                return;
-            }
+        private void triggerTimeSeek(object o) {
+            onTimeSeek(o);
         }
 
         // whenever a non-timeseek time-related button is pressed on the client such as

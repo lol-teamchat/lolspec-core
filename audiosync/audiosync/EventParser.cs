@@ -7,19 +7,32 @@ using System.Threading.Tasks;
 namespace audiosync {
     internal class EventParser {
 
-        public static float extractReplayTime(string message) {
+        public static double extractSetCurrentReplayTime(string message) {
 
             string[] funcs = message.Split(',');  
 
-            for (int i = 0; i < funcs.Length; i++) {
+            for (int i = 0; i < funcs.Length-1; i++) {
                 if (funcs[i].Equals("SetCurrentReplayTime")) {
                     // get the next element
-                    return float.Parse(funcs[i + 1]);                    
+                    return double.Parse(funcs[i + 1]);
                 }
             }
 
-            // no time found in this message (-1F)
-            return -1F;                      
+            // no time found in this message (-1)
+            return -1.0;                      
         } 
+
+        public static bool extractReplayFastForwardCaughtUp(string message) {
+
+            string[] funcs = message.Split(',');
+            for (int i = 1; i < funcs.Length; i++) {
+                if (funcs[i].Equals("ReplayFastForwardCaughtUp")) {
+                    // get the previous element
+                    return true;
+                }
+            }
+
+            return false;
+        }
     }
 }
