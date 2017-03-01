@@ -32,6 +32,7 @@ public class CommandParser {
         split.subList(1,split.size()).toArray(args);
         GuildMessageReceivedEvent e = null;
 
+        System.out.println("raw = " + raw + "beheaded = " + beheaded + "splitbeheaded = " + splitBeheaded + "invoke = " + invoke + "args = " + args);
         return new CommandContainer(raw, beheaded, splitBeheaded, invoke, args, e);
 	}
 

@@ -28,7 +28,7 @@ public class JoinidCommand implements Command {
         for (int e : arr){
         	arr[e]=0;
         }
-        
+        System.out.println("1");
 		FileReader fr = new FileReader("names");
         BufferedReader br = new BufferedReader(fr);
         String name;
@@ -44,6 +44,7 @@ public class JoinidCommand implements Command {
 	        }
         }
         br.close();
+        System.out.println("2");
 		
         VoiceChannel vc = DiscordLeagueBot.api.getGuildById(g).getVoiceChannels().get(0);
         int biggest = arr[0];
@@ -116,7 +117,7 @@ public class JoinidCommand implements Command {
     	
     
  public void action2(String[] args) {
-        
+        System.out.println("gets to ACTION2");
     	VoiceChannel vc=null;
 		try {
 			vc = findCorrectChannel(args[0]);
@@ -137,6 +138,7 @@ public class JoinidCommand implements Command {
         catch (Exception ex) {
             ex.printStackTrace();
         }
+        System.out.println("guild =====" + DiscordLeagueBot.api.getGuildById(args[0]));
         try(  PrintWriter outfile = new PrintWriter(dest)  ){
             outfile.print("Guild: " + DiscordLeagueBot.api.getGuildById(args[0]) + " ");
             outfile.println("Time_Joined_Channel: " + OffsetDateTime.now());
@@ -192,7 +194,7 @@ public class JoinidCommand implements Command {
 
 	@Override
 	public void executed2(boolean success) {
-		// TODO Auto-generated method stub
+		System.out.println("Ended current process");
 		
 	}
 }

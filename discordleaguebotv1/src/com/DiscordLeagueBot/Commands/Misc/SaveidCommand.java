@@ -75,7 +75,7 @@ public class SaveidCommand implements Command {
 
 	@Override
 	public void executed2(boolean success) {
-		// TODO Auto-generated method stub
+		System.out.println("Ended current process");
 		
 	}
 }

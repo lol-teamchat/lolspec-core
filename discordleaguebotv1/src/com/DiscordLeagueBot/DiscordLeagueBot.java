@@ -27,6 +27,7 @@ import javax.security.auth.login.LoginException;
 import javax.sound.sampled.AudioFormat;
 import java.awt.*;
 import java.io.*;
+import java.lang.management.ManagementFactory;
 import java.time.OffsetDateTime;
 import java.util.*;
 import java.util.List;
@@ -55,7 +56,16 @@ public class DiscordLeagueBot
                     .buildBlocking();
             br.close();
             
+            CommandHandler.commands.put("help", new HelpCommand());
+            CommandHandler.commands.put("join", new JoinCommand());
+            CommandHandler.commands.put("leave", new LeaveCommand());
+            CommandHandler.commands.put("save", new SaveCommand());
+            CommandHandler.commands.put("clip", new ClipCommand());
+            CommandHandler.commands.put("joinid", new JoinidCommand());
+            CommandHandler.commands.put("saveid", new SaveidCommand());
+            System.out.println(ManagementFactory.getRuntimeMXBean().getName());
             com.ConsoleCommand.ConsoleCommand1.instance.start();
+            System.out.println("Ended current process");
         }
         
         catch (InterruptedException ex)
@@ -86,14 +96,7 @@ public class DiscordLeagueBot
          * Tells the bot which commands it has, they need to be listed here to
          * work correctly and to be included in the "help" command
          */
-        
-        CommandHandler.commands.put("help", new HelpCommand());
-        CommandHandler.commands.put("join", new JoinCommand());
-        CommandHandler.commands.put("leave", new LeaveCommand());
-        CommandHandler.commands.put("save", new SaveCommand());
-        CommandHandler.commands.put("clip", new ClipCommand());
-        CommandHandler.commands.put("joinid", new JoinidCommand());
-        CommandHandler.commands.put("saveid", new SaveidCommand());
+
 
     }
     
@@ -170,31 +173,16 @@ public class DiscordLeagueBot
             System.out.format("Saving audio file '%s' from %s on %s of size %f MB\n",
                     dest.getName(), guild.getAudioManager().getConnectedChannel().getName(), guild.getName(), (double) dest.length() / 1024 / 1024);
 
-            if (dest.length() / 1024 / 1024 < 8) {
-               // final TextChannel channel = tc;
-               // tc.sendFile(dest, null).queue(null, (Throwable) -> {
-                //    channel.sendMessage("I don't have permissions to send files here!").queue();
-                //});
-
-                new Thread(() -> {
-                    try { sleep(1000 * 20); } catch (Exception ex) {}    //20 second life for files set to discord (no need to save)
-
-                    dest.delete();
-                    System.out.println("\tDeleting file " + dest.getName() + "...");
-
-                }).start();
-
-            } else {
               //  DiscordLeagueBot.sendMessage(tc, "C:/Users/Evan Green/Desktop/recording/" + dest.getName());
 
-                new Thread(() -> {
-                    try { sleep(1000 * 60 * 60); } catch (Exception ex) {}    //1 hour life for files stored on web server
+             //   new Thread(() -> {
+             //       try { sleep(1000 * 60 * 60); } catch (Exception ex) {}    //1 hour life for files stored on web server
 
-                    dest.delete();
-                    System.out.println("\tDeleting file " + dest.getName() + "...");
+               //     dest.delete();
+              //      System.out.println("\tDeleting file " + dest.getName() + "...");
 
-                }).start();
-            }
+             //   }).start();
+            
 
         } catch (Exception ex) {
             ex.printStackTrace();

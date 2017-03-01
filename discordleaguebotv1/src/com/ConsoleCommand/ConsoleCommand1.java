@@ -44,15 +44,17 @@ public class ConsoleCommand1 implements Runnable {
         String line;
         // It would be better to change this to like BotInstance.running or something of the sorts.
         while (thread.isAlive()) {
+        	if(scanner.hasNext()){
             if((line = scanner.nextLine()) != null) {
             if (line.contains("save")){
             	SaveidCommand(line);
             }
             else if (line.contains("join")){
+            	System.out.println("input to stdin:" + line);
             	JoinidCommand(line);
             }
             }
-            
+        	}
         }
     }
     public void SaveidCommand(String id){
