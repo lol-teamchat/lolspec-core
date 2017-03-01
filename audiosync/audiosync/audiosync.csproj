@@ -55,6 +55,7 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Management" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -69,9 +70,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\ClrInjectionLib\ClrInjectionLib.vcxproj">
-      <Project>{a1596b17-cdee-4e18-abd5-ad6c2dc43afa}</Project>
-      <Name>ClrInjectionLib</Name>
+    <ProjectReference Include="..\Injection\Injection.vcxproj">
+      <Project>{640305c5-b0cd-4e64-8f5a-6a0202c9e396}</Project>
+      <Name>Injection</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

@@ -44,3 +44,16 @@ plugin.initialize(function(status) {
 	});
 
 });
+
+overwolf.games.events.getInfo(cb =>
+	{
+		var info = cb.res.game_info.teams;
+		var decoded = JSON.parse(decodeURI(info));
+
+		var red_team = decoded.splice(5)
+		var blue_team = decoded;
+
+		console.log("blue_team = ", blue_team);
+		console.log("red_team = ", red_team);
+	}
+)

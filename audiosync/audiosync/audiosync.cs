@@ -27,10 +27,11 @@ namespace audiosync
         }
 
         static int Main(string[] args) {
-            var injector = new LeagueInjector();
-            var dll = $"{Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)}\\{"LeagueReplayHook.dll"}";
-            Console.WriteLine(dll);
-            if (injector.Inject(dll) == true) {
+
+            var dll = "LeagueReplayHook.dll";
+            //Console.WriteLine(dll);
+            var dllPath = $"{Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)}\\{dll}";
+            if (LeagueInjector.Inject(dll) == true) {
                 Console.WriteLine(dll + " injected successfully");
             }
             else {
