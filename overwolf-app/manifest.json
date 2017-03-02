@@ -10,7 +10,7 @@
     "icon_gray":"icon_gray.png",
     "description":"spectate League of legends"
   },
-  "permissions": ["Extensions", "GameInfo"],
+  "permissions": ["Extensions", "GameInfo", "Media"],
   "data": {
     "start_window":"index",
     "windows":{
@@ -28,8 +28,29 @@
           "Top": 100,
           "Left": 300
         }
-      }
+	  },
+	  "audio": {
+	    "file": "audio.html",
+	    "transparent":true,
+	    "resizable":true,
+	    "show_in_taskbar": true,
+	    "in_game_only": false,
+	    "size": {
+	    	"width": 400,
+	    	"height": 400
+	    },
+	    "start_position": {
+			"Top": 500,
+			"Left": 300
+	  	}
+       }
     },
+	"protocol_override_domains" : {"xddddd.ddns.net": "http"},
+	"externally_connectable": {
+	    "matches": [
+	        "http://*.xddddd.ddns.net",
+	    ]
+	},
 	"game_events": [5426],
     "launch_events": [
       {
@@ -37,7 +58,7 @@
         "event_data": {
           "game_ids": [5426]
         },
-        "start_minimized": false
+        "start_minimized": true
       }
     ],
 	"extra-objects": {

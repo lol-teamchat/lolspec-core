@@ -36,7 +36,7 @@ namespace audiosync {
             new Task(() => {
                 while (!stop) {                    
                     string msg = getMessage();
-                    Console.Error.WriteLine(msg);
+                    //Console.Error.WriteLine(msg);
                     // a different message is received
                     if (msg != null && lastMessage != msg) {
                         lastMessage = msg;

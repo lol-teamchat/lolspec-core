@@ -1,0 +1,95 @@
+<html>
+	<head>
+		<title>media player</title>
+		<script src="js/jquery.min.js"></script>
+		<script src="js/howler.core.min.js"></script>
+		<!-- <link rel="stylesheet" href="style.css" /> -->
+	</head>
+
+	<body>
+		<div style="width: 300px; height: 200px; background-color: black;" id="content" onmousedown="dragMove();">
+
+		</div>
+	</body>
+
+	<script>
+
+		function dragMove(){
+			overwolf.windows.getCurrentWindow(function(result){
+				if (result.status=="success"){
+					overwolf.windows.dragMove(result.window.id);
+				}
+			});
+		};
+
+		function closeWindow(){
+			overwolf.windows.getCurrentWindow(function(result){
+				if (result.status=="success"){
+					overwolf.windows.close(result.window.id);
+				}
+			});
+		};
+
+
+		var sound;
+		$( document ).ready(function() {
+		  // Handler for .ready() called.
+	  		var offset = 0;
+	  		console.log("running script audio.html");
+
+	  		overwolf.windows.onMessageReceived.addListener(function(cb) {
+	  			console.log("recieived a message", cb);
+
+	  			if (cb.id == "file_info") {
+	  				offset = cb.content.offset;
+	  				sound = new Howl({
+	  					src: [cb.content.src],
+	  					html5: true
+	  				});
+	  				console.log("src=",cb.content.src);
+	  				sound.once('load', function(){
+	  				  console.log("done loading")
+	  				});
+	  			}
+
+				else if (sound != null) { // null check before doing anything other than creating sound
+					if (cb.id == "timeseek") {
+		  				if (sound.state() == "loaded") {
+		  					sound.seek((cb.content + offset));
+		  				}
+						else {
+							sound.once('load', function() {
+								sound.seek((cb.content + offset));
+							})
+						}
+		  			}
+
+		  			else if (cb.id == "pause") {
+						if (sound.state() == "loaded") {
+		  					sound.pause();
+		  				}
+		  			}
+
+		  			else if (cb.id == "play") {
+		  				if (sound.state() != "loaded") {
+		  					console.log("unloaded")
+		  					sound.once('load', function(){
+								sound.seek(cb.content);
+		  						sound.play();
+		  					});
+		  				}
+		  				else {
+							sound.seek(cb.content);
+							sound.play();
+		  					console.log("playing audio");
+		  				}
+		  			}
+				}
+				else {
+					console.log("sound is null");
+				}
+	  		})
+		});
+	</script>
+
+</html>

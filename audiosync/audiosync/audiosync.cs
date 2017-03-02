@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Media;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
@@ -73,9 +74,13 @@ namespace audiosync
 
         public void setMatchStartTime(double currentTimeStamp, Action<object> callback) {
             // tell the synchronizer what time should be synced
-            triggerTimeSeek("1");
-            triggerTimeSeek("2");
-            triggerTimeSeek("3");
+            //triggerTimeSeek("1");
+            //triggerTimeSeek("2");
+            //triggerTimeSeek("3");
+
+            //System.Media.SoundPlayer player = new System.Media.SoundPlayer(@"c:\users\Adam\Desktop\11_-_Bird_of_Paradise.wav");
+            //player.Play();
+
             sync.setStartTime(currentTimeStamp);
             callback("game start time at " + currentTimeStamp);
 
