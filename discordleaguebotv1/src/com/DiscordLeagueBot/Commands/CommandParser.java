@@ -5,18 +5,6 @@ import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
 import java.util.ArrayList;
 
 public class CommandParser {
-    public CommandContainer parse(String rw, GuildMessageReceivedEvent e){
-        ArrayList<String> split = new ArrayList<>();
-        String prefix = DiscordLeagueBot.serverSettings.get(e.getGuild().getId()).prefix;
-        String raw = rw;
-        String beheaded = raw.replaceFirst(prefix, "");
-        String[] splitBeheaded = beheaded.split(" ");
-        for(String s : splitBeheaded) {split.add(s);}
-        String invoke = split.get(0);
-        String[] args = new String[split.size() - 1];
-        split.subList(1,split.size()).toArray(args);
-        return new CommandContainer(raw, beheaded, splitBeheaded, invoke, args, e);
-    }
     
 	public CommandContainer parse(String id) {
 		
@@ -32,7 +20,7 @@ public class CommandParser {
         split.subList(1,split.size()).toArray(args);
         GuildMessageReceivedEvent e = null;
 
-        System.out.println("raw = " + raw + "beheaded = " + beheaded + "splitbeheaded = " + splitBeheaded + "invoke = " + invoke + "args = " + args);
+        //System.out.println("raw = " + raw + "beheaded = " + beheaded + "splitbeheaded = " + splitBeheaded + "invoke = " + invoke + "args = " + args);
         return new CommandContainer(raw, beheaded, splitBeheaded, invoke, args, e);
 	}
 
