@@ -1,71 +1,71 @@
 {
-  "manifest_version":"1",
-  "type":"WebApp",
-  "meta":{
-    "name":"LoL Spectator",
-    "version":"1.0.0.0",
-    "minimum-overwolf-version": "0.85.0.0",
-    "author":"Overwolf",
-    "icon":"icon.png",
-    "icon_gray":"icon_gray.png",
-    "description":"spectate League of legends"
-  },
-  "permissions": ["Extensions", "GameInfo", "Media"],
-  "data": {
-    "start_window":"index",
-    "windows":{
-      "index":{
-        "file":"index.html",
-        "transparent":false,
-        "resizable":true,
-        "show_in_taskbar": true,
-		"in_game_only": false,
-        "size": {
-          "width": 400,
-          "height": 400
-        },
-        "start_position": {
-          "Top": 100,
-          "Left": 300
-        }
-	  },
-	  "audio": {
-	    "file": "audio.html",
-	    "transparent":true,
-	    "resizable":true,
-	    "show_in_taskbar": true,
-	    "in_game_only": false,
-	    "size": {
-	    	"width": 400,
-	    	"height": 400
-	    },
-	    "start_position": {
-			"Top": 500,
-			"Left": 300
-	  	}
-       }
-    },
-	"protocol_override_domains" : {"xddddd.ddns.net": "http"},
-	"externally_connectable": {
-	    "matches": [
-	        "http://*.xddddd.ddns.net",
-	    ]
+	"manifest_version":"1",
+	"type":"WebApp",
+	"meta":{
+		"name":"lolspec",
+		"version":"1.1.0.0",
+		"minimum-overwolf-version": "0.85.0.0",
+		"author":"lolspec team",
+		"icon":"lolspec-icon.png",
+		"icon_gray":"lolspec-icon-grey.png",
+		"description":"listen to recorded voice in League of Legends"
 	},
-	"game_events": [5426],
-    "launch_events": [
-      {
-        "event": "GameLaunch",
-        "event_data": {
-          "game_ids": [5426]
-        },
-        "start_minimized": true
-      }
-    ],
-	"extra-objects": {
-		"audiosync": {
-          "file": "plugins/audiosync.dll",
-          "class": "audiosync.Audiosync"
-        }
-    }
-  }
+	"permissions": ["Extensions", "GameInfo"],
+	"data": {
+		"start_window":"index",
+		"windows":{
+			"index":{
+				"file":"index.html",
+				"transparent":false,
+				"resizable":true,
+				"show_in_taskbar": true,
+				"in_game_only": false,
+				"size": {
+					"width": 400,
+					"height": 400
+				},
+				"start_position": {
+					"Top": 100,
+					"Left": 300
+				}
+			},
+			"audio": {
+				"file": "audio.html",
+				"transparent":true,
+				"resizable":true,
+				"show_in_taskbar": true,
+				"in_game_only": false,
+				"size": {
+					"width": 400,
+					"height": 400
+				},
+				"start_position": {
+					"Top": 500,
+					"Left": 300
+				}
+			}
+		},
+		"protocol_override_domains" : {"xddddd.ddns.net": "http"},
+		"externally_connectable": {
+			"matches": [
+				"http://*.xddddd.ddns.net",
+			]
+		},
+		"game_events": [5426],
+		"launch_events": [
+			{
+				"event": "GameLaunch",
+				"event_data": {
+					"game_ids": [5426]
+				},
+				"start_minimized": true
+			}
+		],
+		"extra-objects": {
+			"audiosync": {
+				"file": "plugins/audiosync.dll",
+				"class": "audiosync.Audiosync"
+			}
+		}
+	}
 }

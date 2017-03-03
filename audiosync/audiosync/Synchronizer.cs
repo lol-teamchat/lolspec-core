@@ -11,6 +11,7 @@ namespace audiosync {
         private Listener listener;
         private Action<object> timeSeek;
         private readonly Stopwatch watch;
+        private double lastTimeInGame;
 
         public Synchronizer(Listener listener, Action<object> triggerTimeSeek) {
             timeSeek = triggerTimeSeek;
@@ -29,20 +30,24 @@ namespace audiosync {
             // it with the stopwatch to see if there are any time seeks
             listener.add(message => {
 
-                //timeSeek((string)message);
-            
+                double receivedTime = EventParser.extractSetCurrentReplayTime((string)message);
+                lastTimeInGame = receivedTime;
+
                 if (EventParser.extractReplayFastForwardCaughtUp((string)message) == false) {
                     return;
                 }
-                double receivedTime = EventParser.extractSetCurrentReplayTime((string)message);
-
+                //double receivedTime = EventParser.extractSetCurrentReplayTime((string)message);
+                
                 if (receivedTime != -1.0) {
                     Task.Run(() => {
                         timeSeek(receivedTime);
                     });                    
-                }
-            
+                }            
             });
-        }   
+        } 
+        
+        internal double getLastTime() {
+            return lastTimeInGame;
+        }  
     }
 }

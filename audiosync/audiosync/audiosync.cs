@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Media;
@@ -17,6 +18,7 @@ namespace audiosync
         string dllPath;
         Listener listener;
         Synchronizer sync;
+        bool watchingReplay;
 
         // constructor
         public Audiosync() {
@@ -24,67 +26,39 @@ namespace audiosync
             dllPath = $"{Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)}\\{dll}";
             if (LeagueInjector.Inject(dllPath) == false) {
                 Logger.setError("failed to inject " + dll);
+                watchingReplay = false;
+                return;
             }
+            watchingReplay = true;       
             // listens for udp data
             listener = new Listener(listen_port);
             // triggers events when listened data becomes out of sync
             sync = new Synchronizer(listener, triggerTimeSeek);
         }
 
-        // getUIMessage(callback(success, message));
-        //public void getUIMessage(Action<object, object> callback) {     
-        //    // check for invalid callback      
-        //    if (callback == null) {
-        //        return;
-        //    }
-        //    if (listener == null) {
-        //        callback("error", Logger.getError());
-        //    }
-        //    else {
-        //        string msg = listener.GetMessage();
-        //        if (msg == "error") {
-        //            callback("error", Logger.getError());
-        //            return;
-        //        }
-        //        callback("success", msg);
-        //    }                   
-        //}
+        // used to tell if the audiosync plugin injected properly
+        // and the league of legends mode is a valid replay
+        public void isPlayingReplay(Action<object> callback) {
+            if (watchingReplay) {
+                callback(true);
+            }
+            else {
+                callback(false);
+            }
+        }
 
-        // getGameTime(callback(success, message));
-        //public void getGameTime(Action<object, object> callback) {
-        //    // check for invalid callback      
-        //    if (callback == null) {
-        //        return;
-        //    }
-        //    if (listener == null) {
-        //        callback("error", Logger.getError());
-        //    }
-        //    else {
-        //        string msg = listener.GetMessage();
-        //        if (msg == "error") {
-        //            callback("error", Logger.getError());
-        //            return;
-        //        }
-        //        callback("success", msg);
-        //    }
-        //    // get the current time of the game
-        //    // TODO 
-        //    // ----------------------->                      
-        //}
-
+        // tells the plugin the current time in the game and resynchronizes
         public void setMatchStartTime(double currentTimeStamp, Action<object> callback) {
-            // tell the synchronizer what time should be synced
-            //triggerTimeSeek("1");
-            //triggerTimeSeek("2");
-            //triggerTimeSeek("3");
-
-            //System.Media.SoundPlayer player = new System.Media.SoundPlayer(@"c:\users\Adam\Desktop\11_-_Bird_of_Paradise.wav");
-            //player.Play();
-
+            if (sync == null) {
+                callback("not watching a replay");
+                return;
+            }
             sync.setStartTime(currentTimeStamp);
-            callback("game start time at " + currentTimeStamp);
+            callback("setStartTime -- game start time at " + currentTimeStamp);
+        }
 
-            //MessageBox.Show("currentTimeStamp= " + currentTimeStamp, null, MessageBoxButtons.OK);
+        public void getLeagueArgs(Action<object> callback) {            
+            callback(LeagueInjector.getLeagueArgs());
         }
 
         // updates callback whenever a timeSeek action occurs
@@ -93,6 +67,14 @@ namespace audiosync
 
         private void triggerTimeSeek(object o) {
             onTimeSeek(o);
+        }
+
+        public void getLastTime(Action<object> callback) {
+            if (sync == null) {
+                callback("getLastTime -- not watching a replay");
+                return;
+            }
+            callback(sync.getLastTime());
         }
 
         // whenever a non-timeseek time-related button is pressed on the client such as

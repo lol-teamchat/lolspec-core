@@ -1,5 +1,0 @@
-Guild: G:League Testing(279394304894435329) Time_Joined_Channel: 2017-02-28T19:53:38.306-08:00
-Guild: G:League Testing(279394304894435329) Time_Left_Channel: 2017-02-28T20:09:12.935-08:00
-
-
-247.231661 => 1:00 in game

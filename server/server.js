@@ -83,6 +83,8 @@ for (var i = 0; i < players.length; i++) {
 }
 
 function recordGame(responseObj) {
+	console.log(responseObj);
+	// take responseObj and create a database entry for this
 	var spinner = new Spinner('Game in progress - Downloading replay.. %s');
 	spinner.setSpinnerDelay(100);
 	spinner.setSpinnerString('┤┘┴└├┌┬┐');
