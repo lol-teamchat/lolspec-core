@@ -19,6 +19,7 @@ public class JoinidCommand implements Command {
         for (int e : arr){
         	arr[e]=0;
         }
+        
 		FileReader fr = new FileReader("names");
         BufferedReader br = new BufferedReader(fr);
         String name;
@@ -49,7 +50,7 @@ public class JoinidCommand implements Command {
     	
     
  public void action(String[] args) {
-    	VoiceChannel vc=null;
+    	VoiceChannel vc = null;
 		try {
 			vc = findCorrectChannel(args[0]);
 		} catch (IOException e2) {
@@ -58,7 +59,6 @@ public class JoinidCommand implements Command {
 		DiscordLeagueBot.joinVoiceChannel(vc,true);
 		AudioReceiveListener ah = (AudioReceiveListener) DiscordLeagueBot.api.getGuildById(args[0]).getAudioManager().getReceiveHandler();
 		UserSpeakingListener usl = new UserSpeakingListener(vc, ah.rand);
-		//System.out.println(DiscordLeagueBot.api.getGuildById(args[0]).getAudioManager().toString());
 		DiscordLeagueBot.api.getGuildById(args[0]).getAudioManager().setConnectionListener(usl);
     }
 	@Override

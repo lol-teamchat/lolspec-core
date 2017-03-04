@@ -73,13 +73,19 @@ public class AudioReceiveListener implements AudioReceiveHandler
         canReceive = false;
 
         //flush remaining audio
-        byte[] remaining = new byte[uncompIndex];
 
+        byte[] remaining = new byte[uncompIndex];
         int start = uncompIndex < uncompVoiceData.length / 2 ? 0 : uncompVoiceData.length / 2;
+        
+        if (start == 0)
+        	remaining = new byte[uncompIndex];
+        else
+        	remaining = new byte[(uncompIndex - (uncompVoiceData.length / 2))];
 
         for (int i = 0; i < uncompIndex - start; i++) {
             remaining[i] = uncompVoiceData[start + i];
         }
+        
         System.out.println("gets voice data remaining");
         addCompVoiceData(DiscordLeagueBot.encodePcmToMp3(remaining));
 

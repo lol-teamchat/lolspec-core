@@ -50,8 +50,14 @@ public class DiscordLeagueBot
             CommandHandler.commands.put("leave", new LeaveCommand());
             CommandHandler.commands.put("joinid", new JoinidCommand());
             CommandHandler.commands.put("saveid", new SaveidCommand());
+            
+            //print the process id
             System.out.println(ManagementFactory.getRuntimeMXBean().getName());
+            
+            //starts ConsoleCommandListener, which listens for system.in commands
             com.ConsoleCommand.ConsoleCommandListener.instance.start();
+            
+            //this line is required to know when the bot finishes starting up in cmdHandler.js
             System.out.println("Ended current process");
         }
         
@@ -85,42 +91,7 @@ public class DiscordLeagueBot
 
     /*----------------------------- Utility Functions -----------------------------*/
 
-    //determines largest channel
-    public static VoiceChannel largestChannel(List<VoiceChannel> vcs) {
-        int size = 0;
-        VoiceChannel largest = null;
-
-        for (VoiceChannel v : vcs) {
-            if (voiceChannelSize(v) > size) {
-                if (voiceChannelSize(v) >= DiscordLeagueBot.serverSettings.get(v.getGuild().getId()).autoJoinSettings.get(v.getId())) {
-                    largest = v;
-                    size = voiceChannelSize(v);
-                }
-            }
-        }
-        return largest;
-    }
-
-    //determines users in the provided voice channel
-    public static int voiceChannelSize(VoiceChannel v) {
-        if (v == null) return 0;
-
-        int i = 0;
-        for (Member m : v.getMembers()){
-            if(!m.getUser().isBot()) i++;
-        }
-        return i;
-    }
-
     public static void writeToFile(Guild guild) {
-        writeToFile(guild, -1, null);
-    }
-
-    public static void writeToFile(Guild guild, TextChannel tc) {
-        writeToFile(guild, -1, tc);
-    }
-
-    public static void writeToFile(Guild guild, int time, TextChannel tc) {
         AudioReceiveListener ah = (AudioReceiveListener) guild.getAudioManager().getReceiveHandler();
         if (ah == null) {
         	System.out.println("There was no audio listener when trying to write!");
@@ -137,13 +108,7 @@ public class DiscordLeagueBot
             byte[] voiceData;
             ah.canReceive = false;
 
-            if (time > 0 && time <= AudioReceiveListener.PCM_MINS * 60 * 2) {
-                voiceData = ah.getUncompVoice(time);
-                voiceData = encodePcmToMp3(voiceData);
-
-            } else {
-                voiceData = ah.getVoiceData();
-            }
+            voiceData = ah.getVoiceData();
 
             FileOutputStream fos = new FileOutputStream(dest);
             fos.write(voiceData);
