@@ -22,6 +22,7 @@ import javax.security.auth.login.LoginException;
 import javax.sound.sampled.AudioFormat;
 import java.io.*;
 import java.lang.management.ManagementFactory;
+import java.time.OffsetDateTime;
 import java.util.*;
 import java.util.List;
 
@@ -29,12 +30,11 @@ public class DiscordLeagueBot
 {
 	public static JDA api;
     public static HashMap<String, ServerSettings> serverSettings = new HashMap<>();
-    public static boolean in_vc = false;
 
     public static void main(String[] args)
     {
     	
-    	//Allows control of the discord bot via the special token in "token_loc" 
+    	//Allows control of the discord bot via the special token in "token_loc" file
         try
         {
             FileReader fr = new FileReader("token_loc");
@@ -126,19 +126,18 @@ public class DiscordLeagueBot
         	System.out.println("There was no audio listener when trying to write!");
             return;
         }
-
         File dest;
         try {
 
-            if (new File("recording/").exists())
-                dest = new File("recording/" + getRandString() + ".mp3");
-            else
-                dest = new File("recording/" + getRandString() + ".mp3");
+                if (new File("recording/" + guild.getId().toString() + "/").exists())
+                    dest = new File("recording/" + guild.getId().toString() + "/" + ah.rand + ".mp3");
+                else
+                    dest = new File("recording/" + guild.getId().toString() + "_" + ah.rand + ".mp3");
 
             byte[] voiceData;
             ah.canReceive = false;
 
-            if (time > 0 && time <= ah.PCM_MINS * 60 * 2) {
+            if (time > 0 && time <= AudioReceiveListener.PCM_MINS * 60 * 2) {
                 voiceData = ah.getUncompVoice(time);
                 voiceData = encodePcmToMp3(voiceData);
 
@@ -240,10 +239,61 @@ public class DiscordLeagueBot
         }
         double volume = DiscordLeagueBot.serverSettings.get(vc.getGuild().getId()).volume;
         vc.getGuild().getAudioManager().setReceivingHandler(new AudioReceiveListener(volume));
+        AudioReceiveListener ah = (AudioReceiveListener) vc.getGuild().getAudioManager().getReceiveHandler();
+        ah.rand = DiscordLeagueBot.getRandString();
+        
+		File dest = null;
+        try {
+
+            if (new File("recording/").exists()){
+            	if (!(new File ("recording/" + vc.getGuild().getId().toString() + "/").exists())){
+            		File newdir = new File ("recording/" + vc.getGuild().getId().toString() + "/");
+            		newdir.mkdir();
+            	}
+            	dest = new File("recording/" + vc.getGuild().getId().toString() + "/" + ah.rand + "_timestamp" + ".txt");
+            }
+            else 
+                dest = new File("recording/" + vc.getGuild().getId().toString() + "_" + ah.rand + "_timestamp" + ".txt");
+            
+        }
+        catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        
+        try(  PrintWriter outfile = new PrintWriter(dest)  ){
+            outfile.println("Guild: " + vc.getGuild().toString() + " ");
+            outfile.println("Time_Joined_Channel: " + OffsetDateTime.now());
+            outfile.close();
+        } catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
+        
 
     }
     public static void leaveVoiceChannel(VoiceChannel vc) {
         System.out.format("Leaving '%s' voice channel in %s\n", vc.getGuild(), vc.getGuild().getName());
+        AudioReceiveListener ah = (AudioReceiveListener) vc.getGuild().getAudioManager().getReceiveHandler();
+        File dest = null;
+    	try {
+
+            if (new File("recording/" + vc.getGuild().getId().toString() + "/").exists())
+                dest = new File("recording/" + vc.getGuild().getId().toString() + "/" + ah.rand + "_timestamp" + ".txt");
+            else
+                dest = new File("recording/" + vc.getGuild().getId().toString() + "_" + ah.rand + "_timestamp" + ".txt");
+            
+        }
+        catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        try(  PrintWriter outfile = new PrintWriter(new FileOutputStream (dest,true))  ){
+            outfile.println("Guild: " + vc.getGuild() + " ");
+            outfile.append("Time_Left_Channel: " + OffsetDateTime.now());
+            outfile.close();
+        }
+        
+        catch (Exception ex) {
+            ex.printStackTrace();
+        }
 
         vc.getGuild().getAudioManager().closeAudioConnection();
         DiscordLeagueBot.killAudioHandlers(vc.getGuild());

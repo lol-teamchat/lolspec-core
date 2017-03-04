@@ -12,7 +12,6 @@ public class LeaveCommand implements Command {
 
     @Override
     public void action(String[] args) {
-    	DiscordLeagueBot.in_vc = false;
         DiscordLeagueBot.leaveVoiceChannel(DiscordLeagueBot.api.getGuildById(args[0]).getAudioManager().getConnectedChannel());
     }
 

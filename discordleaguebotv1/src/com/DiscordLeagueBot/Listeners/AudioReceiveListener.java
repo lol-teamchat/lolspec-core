@@ -24,6 +24,7 @@ public class AudioReceiveListener implements AudioReceiveHandler
 
     public int index = 0;
     public boolean overwriting = false;
+    public String rand = "-";
 
     public AudioReceiveListener(double volume) {
         this.volume = volume;
@@ -48,8 +49,9 @@ public class AudioReceiveListener implements AudioReceiveHandler
         	index = uncompIndex;
         	System.out.println("index is " + index);
             new Thread(() -> {
-                if (index == uncompVoiceData.length / 2)  //first half
+                if (index == uncompVoiceData.length / 2){
                     addCompVoiceData(DiscordLeagueBot.encodePcmToMp3(Arrays.copyOfRange(uncompVoiceData, 0, uncompVoiceData.length / 2)));
+                }
                 else{
                 	System.out.println("goes in else");
                 	 addCompVoiceData(DiscordLeagueBot.encodePcmToMp3(Arrays.copyOfRange(uncompVoiceData, uncompVoiceData.length / 2, uncompVoiceData.length )));
