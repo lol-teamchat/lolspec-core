@@ -1,10 +1,6 @@
 package com.DiscordLeagueBot;
 
 import com.DiscordLeagueBot.Commands.*;
-import com.DiscordLeagueBot.Commands.Audio.ClipCommand;
-import com.DiscordLeagueBot.Commands.Audio.SaveCommand;
-import com.DiscordLeagueBot.Commands.Misc.HelpCommand;
-import com.DiscordLeagueBot.Commands.Misc.JoinCommand;
 import com.DiscordLeagueBot.Commands.Misc.JoinidCommand;
 import com.DiscordLeagueBot.Commands.Misc.LeaveCommand;
 import com.DiscordLeagueBot.Commands.Misc.SaveidCommand;
@@ -13,7 +9,6 @@ import com.DiscordLeagueBot.Listeners.AudioReceiveListener;
 import com.DiscordLeagueBot.Listeners.AudioSendListener;
 import com.DiscordLeagueBot.Listeners.EventListener;
 import com.google.gson.Gson;
-import net.dv8tion.jda.core.EmbedBuilder;
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.JDABuilder;
 import net.dv8tion.jda.core.AccountType;
@@ -25,14 +20,10 @@ import net.sourceforge.lame.mp3.MPEGMode;
 
 import javax.security.auth.login.LoginException;
 import javax.sound.sampled.AudioFormat;
-import java.awt.*;
 import java.io.*;
 import java.lang.management.ManagementFactory;
-import java.time.OffsetDateTime;
 import java.util.*;
 import java.util.List;
-
-import static java.lang.Thread.sleep;
 
 public class DiscordLeagueBot
 {
@@ -56,15 +47,11 @@ public class DiscordLeagueBot
                     .buildBlocking();
             br.close();
             
-            CommandHandler.commands.put("help", new HelpCommand());
-            CommandHandler.commands.put("join", new JoinCommand());
             CommandHandler.commands.put("leave", new LeaveCommand());
-            CommandHandler.commands.put("save", new SaveCommand());
-            CommandHandler.commands.put("clip", new ClipCommand());
             CommandHandler.commands.put("joinid", new JoinidCommand());
             CommandHandler.commands.put("saveid", new SaveidCommand());
             System.out.println(ManagementFactory.getRuntimeMXBean().getName());
-            com.ConsoleCommand.ConsoleCommand1.instance.start();
+            com.ConsoleCommand.ConsoleCommandListener.instance.start();
             System.out.println("Ended current process");
         }
         
@@ -91,11 +78,6 @@ public class DiscordLeagueBot
         	//all other exceptions
             ex.printStackTrace();
         }
-
-        /*
-         * Tells the bot which commands it has, they need to be listed here to
-         * work correctly and to be included in the "help" command
-         */
 
 
     }
@@ -139,11 +121,9 @@ public class DiscordLeagueBot
     }
 
     public static void writeToFile(Guild guild, int time, TextChannel tc) {
-        //if (tc == null)
-        //    tc = guild.getTextChannelById(serverSettings.get(guild.getId()).defaultTextChannel);
         AudioReceiveListener ah = (AudioReceiveListener) guild.getAudioManager().getReceiveHandler();
         if (ah == null) {
-          //  DiscordLeagueBot.sendMessage(tc, "I wasn't recording!");
+        	System.out.println("There was no audio listener when trying to write!");
             return;
         }
 
@@ -172,26 +152,8 @@ public class DiscordLeagueBot
 
             System.out.format("Saving audio file '%s' from %s on %s of size %f MB\n",
                     dest.getName(), guild.getAudioManager().getConnectedChannel().getName(), guild.getName(), (double) dest.length() / 1024 / 1024);
-
-              //  DiscordLeagueBot.sendMessage(tc, "C:/Users/Evan Green/Desktop/recording/" + dest.getName());
-
-             //   new Thread(() -> {
-             //       try { sleep(1000 * 60 * 60); } catch (Exception ex) {}    //1 hour life for files stored on web server
-
-               //     dest.delete();
-              //      System.out.println("\tDeleting file " + dest.getName() + "...");
-
-             //   }).start();
-            
-
         } catch (Exception ex) {
             ex.printStackTrace();
-
-           // if (tc != null)
-            //    DiscordLeagueBot.sendMessage(tc, "Unknown error sending file");
-           // else
-            //    DiscordLeagueBot.sendMessage(guild.getTextChannelById(serverSettings.get(guild.getId()).defaultTextChannel), "Unknown error sending file");
-
         }
     }
 
@@ -274,7 +236,7 @@ public class DiscordLeagueBot
             vc.getGuild().getAudioManager().openAudioConnection(vc);
         } catch (Exception e) {
             if (warning)
-                sendMessage(vc.getGuild().getPublicChannel(), "I don't have permission to join that voice channel!");
+                sendMessage(vc.getGuild().getPublicChannel(), "Please give me permission to join your voice channel!");
         }
         double volume = DiscordLeagueBot.serverSettings.get(vc.getGuild().getId()).volume;
         vc.getGuild().getAudioManager().setReceivingHandler(new AudioReceiveListener(volume));

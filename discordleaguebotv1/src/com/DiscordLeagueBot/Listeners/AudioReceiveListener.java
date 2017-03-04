@@ -12,7 +12,7 @@ public class AudioReceiveListener implements AudioReceiveHandler
     public static final double STARTING_MB = 0.5;
     public static final int CAP_MB = 100;
     //orig 2, start mb 0.5
-    public static final double PCM_MINS = 0.1;
+    public static final double PCM_MINS = 2;
     public boolean canReceive = true;
     public double volume = 1.0;
 
@@ -22,6 +22,7 @@ public class AudioReceiveListener implements AudioReceiveHandler
     public byte[] compVoiceData = new byte[(int) (1024 * 1024 * STARTING_MB)];    //start with 0.5 MB
     public int compIndex = 0;
 
+    public int index = 0;
     public boolean overwriting = false;
 
     public AudioReceiveListener(double volume) {
@@ -43,14 +44,17 @@ public class AudioReceiveListener implements AudioReceiveHandler
     @Override
     public void handleCombinedAudio(CombinedAudio combinedAudio)
     {
-    	
         if (uncompIndex == uncompVoiceData.length / 2 || uncompIndex == uncompVoiceData.length) {
+        	index = uncompIndex;
+        	System.out.println("index is " + index);
             new Thread(() -> {
-
-                if (uncompIndex < uncompVoiceData.length / 2)  //first half
+                if (index == uncompVoiceData.length / 2)  //first half
                     addCompVoiceData(DiscordLeagueBot.encodePcmToMp3(Arrays.copyOfRange(uncompVoiceData, 0, uncompVoiceData.length / 2)));
-                else
-                    addCompVoiceData(DiscordLeagueBot.encodePcmToMp3(Arrays.copyOfRange(uncompVoiceData, uncompVoiceData.length / 2, uncompVoiceData.length )));
+                else{
+                	System.out.println("goes in else");
+                	 addCompVoiceData(DiscordLeagueBot.encodePcmToMp3(Arrays.copyOfRange(uncompVoiceData, uncompVoiceData.length / 2, uncompVoiceData.length )));
+                }
+                   
 
             }).start();
 
@@ -74,7 +78,7 @@ public class AudioReceiveListener implements AudioReceiveHandler
         for (int i = 0; i < uncompIndex - start; i++) {
             remaining[i] = uncompVoiceData[start + i];
         }
-
+        System.out.println("gets voice data remaining");
         addCompVoiceData(DiscordLeagueBot.encodePcmToMp3(remaining));
 
         byte[] orderedVoiceData;

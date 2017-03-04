@@ -1,13 +1,11 @@
 package com.DiscordLeagueBot.Listeners;
 
 import com.DiscordLeagueBot.DiscordLeagueBot;
-import com.DiscordLeagueBot.Commands.CommandHandler;
 import com.DiscordLeagueBot.Configuration.ServerSettings;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import net.dv8tion.jda.core.entities.Game;
 import net.dv8tion.jda.core.entities.Guild;
-import net.dv8tion.jda.core.entities.VoiceChannel;
 import net.dv8tion.jda.core.events.ReadyEvent;
 import net.dv8tion.jda.core.events.guild.GuildJoinEvent;
 import net.dv8tion.jda.core.events.guild.GuildLeaveEvent;
@@ -20,8 +18,11 @@ import net.dv8tion.jda.core.hooks.ListenerAdapter;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileReader;
+import java.io.PrintWriter;
 import java.lang.reflect.Type;
+import java.time.OffsetDateTime;
 import java.util.HashMap;
 
 import static java.lang.Thread.sleep;
@@ -46,114 +47,77 @@ public class EventListener extends ListenerAdapter {
 
     @Override
     public void onGuildVoiceJoin(GuildVoiceJoinEvent e) {
-        if(e.getMember().getUser().isBot())
-            return;
+    	//THE BOT'S ID
+    	//System.out.println(e.getMember().getUser().getId());
+        if(e.getMember().getUser().getId().equals("279413450784899072")){
+    		File dest = null;
+            try {
 
-        if (e.getGuild().getAudioManager().isConnected()) {
-
-            int newSize = DiscordLeagueBot.voiceChannelSize(e.getChannelJoined());
-            int botSize = DiscordLeagueBot.voiceChannelSize(e.getGuild().getAudioManager().getConnectedChannel());
-            int min = DiscordLeagueBot.serverSettings.get(e.getGuild().getId()).autoJoinSettings.get(e.getChannelJoined().getId());
-
-            if (newSize >= min && botSize < newSize) {  //check for tie with old server
-                if (DiscordLeagueBot.serverSettings.get(e.getGuild().getId()).autoSave)
-                    DiscordLeagueBot.writeToFile(e.getGuild());  //write data from voice channel it is leaving
-
-                DiscordLeagueBot.joinVoiceChannel(e.getChannelJoined(), false);
+                if (new File("recording/").exists())
+                    dest = new File("recording/timestamp" + ".txt");
+                else
+                    dest = new File("recording/timestamp" + ".txt");
+                
             }
-
+            catch (Exception ex) {
+                ex.printStackTrace();
+            }
+            
+            try(  PrintWriter outfile = new PrintWriter(dest)  ){
+                outfile.print("Guild: " + e.getGuild().toString() + " ");
+                outfile.println("Time_Joined_Channel: " + OffsetDateTime.now());
+            }
+           
+            catch (Exception ex) {
+                ex.printStackTrace();
+            }
         }
+        
+        return;
     }
 
     @Override
     public void onGuildVoiceLeave(GuildVoiceLeaveEvent e) {
-        if(e.getMember().getUser().isBot())
-            return;
-
-        int min = DiscordLeagueBot.serverSettings.get(e.getGuild().getId()).autoLeaveSettings.get(e.getChannelLeft().getId());
-        int size = DiscordLeagueBot.voiceChannelSize(e.getChannelLeft());
-
-        if (size <= min && e.getGuild().getAudioManager().getConnectedChannel() == e.getChannelLeft()) {
-
-            if (DiscordLeagueBot.serverSettings.get(e.getGuild().getId()).autoSave)
-                DiscordLeagueBot.writeToFile(e.getGuild());  //write data from voice channel it is leaving
-
-            DiscordLeagueBot.leaveVoiceChannel(e.getGuild().getAudioManager().getConnectedChannel());
+    	
+    	//bot's ID
+        if(e.getMember().getUser().getId().equals("279413450784899072")){
+    		File dest = null;
+	    	try {
+	
+	            if (new File("recording/").exists())
+	                dest = new File("recording/timestamp" + ".txt");
+	            else
+	                dest = new File("recording/timestamp" + ".txt");
+	            
+	        }
+	        catch (Exception ex) {
+	            ex.printStackTrace();
+	        }
+	        try(  PrintWriter outfile = new PrintWriter(new FileOutputStream (dest,true))  ){
+	            outfile.append("Guild: " + e.getGuild() + " ");
+	            outfile.append("Time_Left_Channel: " + OffsetDateTime.now());
+	        }
+	        
+	        catch (Exception ex) {
+	            ex.printStackTrace();
+	        }
         }
+        return;
     }
 
     @Override
     public void onGuildVoiceMove (GuildVoiceMoveEvent e) {
-        if(e.getMember().getUser().isBot())
-            return;
-
-        //Check if bot needs to join newly joined channel
-        
-
-        if (e.getGuild().getAudioManager().isConnected()) {
-
-            int newSize = DiscordLeagueBot.voiceChannelSize(e.getChannelJoined());
-            int botSize = DiscordLeagueBot.voiceChannelSize(e.getGuild().getAudioManager().getConnectedChannel());
-            int min = DiscordLeagueBot.serverSettings.get(e.getGuild().getId()).autoJoinSettings.get(e.getChannelJoined().getId());
-
-            if (newSize >= min && botSize < newSize) {  //check for tie with old server
-                if (DiscordLeagueBot.serverSettings.get(e.getGuild().getId()).autoSave)
-                    DiscordLeagueBot.writeToFile(e.getGuild());  //write data from voice channel it is leaving
-
-                DiscordLeagueBot.joinVoiceChannel(e.getChannelJoined(), false);
-            }
-
-        }
-
-        //Check if bot needs to leave old channel
-        int min = DiscordLeagueBot.serverSettings.get(e.getGuild().getId()).autoLeaveSettings.get(e.getChannelLeft().getId());
-        int size = DiscordLeagueBot.voiceChannelSize(e.getChannelLeft());
-
-        if (size <= min && e.getGuild().getAudioManager().getConnectedChannel() == e.getChannelLeft()) {
-
-            if (DiscordLeagueBot.serverSettings.get(e.getGuild().getId()).autoSave)
-                DiscordLeagueBot.writeToFile(e.getGuild());  //write data from voice channel it is leaving
-
-            DiscordLeagueBot.leaveVoiceChannel(e.getGuild().getAudioManager().getConnectedChannel());;
-
-            VoiceChannel largest = DiscordLeagueBot.largestChannel(e.getGuild().getVoiceChannels());
-            if (largest != null) {
-                DiscordLeagueBot.joinVoiceChannel(e.getChannelJoined(), false);
-            }
-        }
+      return;
     }
 
     @Override
     public void onGuildMessageReceived(GuildMessageReceivedEvent e){
-        if(e.getMember().getUser().isBot())
-            return;
-
-        String prefix = DiscordLeagueBot.serverSettings.get(e.getGuild().getId()).prefix;
-        if (e.getMessage().getContent().startsWith(prefix) && !e.getMessage().getAuthor().isBot()) {
-            System.out.println("--- " + e.getAuthor().getName() + ": " + e.getMessage().getContent());
-            CommandHandler.handleCommand(CommandHandler.parser.parse(e.getMessage().getContent().toLowerCase(), e));
-        }
+        return;
     }
 
     @Override
     public void onPrivateMessageReceived(PrivateMessageReceivedEvent e) {
-        if (e.getMessage().getContent().equals("!alerts off")) {
-            for (Guild g : e.getJDA().getGuilds()) {
-                if (g.getMember(e.getAuthor()) != null) {
-                    DiscordLeagueBot.serverSettings.get(g.getId()).alertBlackList.add(e.getAuthor().getId());
-                }
-            }
-            e.getChannel().sendMessage("Alerts now off, message `!alerts on` to re-enable at any time").queue();
-            DiscordLeagueBot.writeSettingsJson();
-        } else if (e.getMessage().getContent().equals("!alerts on")) {
-            for (Guild g : e.getJDA().getGuilds()) {
-                if (g.getMember(e.getAuthor()) != null) {
-                    DiscordLeagueBot.serverSettings.get(g.getId()).alertBlackList.remove(e.getAuthor().getId());
-                }
-            }
-            e.getChannel().sendMessage("Alerts now on, message `!alerts off` to disable at any time").queue();
-            DiscordLeagueBot.writeSettingsJson();
-        }
+    	return;
     }
 
     @Override
@@ -161,12 +125,12 @@ public class EventListener extends ListenerAdapter {
         e.getJDA().getPresence().setGame(new Game() {
             @Override
             public String getName() {
-                return "!help | https://github.com/adamschachne/league-replay";
+                return "http://xddddd.ddns.net/lolspec/";
             }
 
             @Override
             public String getUrl() {
-                return "https://github.com/adamschachne/league-replay";
+                return "http://xddddd.ddns.net/lolspec/";
             }
 
             @Override
@@ -204,7 +168,10 @@ public class EventListener extends ListenerAdapter {
                 DiscordLeagueBot.writeSettingsJson();
             }
         }
-/*
+        
+        //used to delete files after a certain amount of time
+        
+        /*
         File dir = new File("recording/");
         if (!dir.exists())
             dir = new File("recording/");
@@ -221,7 +188,6 @@ public class EventListener extends ListenerAdapter {
                 }).start();
             }
         }
-        
         */
 
     }
