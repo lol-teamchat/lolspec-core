@@ -2,17 +2,19 @@ const io = require('socket.io').listen(3000);
 const https = require('https');
 const figlet = require('figlet');
 const Spinner = require('cli-spinner').Spinner;
-const fs = require('fs')
-
+const fs = require('fs');
+const cmdHandler = require('./cmdHandler.js');
 //clear the console
 process.stdout.write('\033c');
+
+cmdHandler.startDiscordBot();
 
 // define variables
 var api_key, players;
 var interval_ms = 5000;// how long to wait before checking if a summoner is in game
 var config = JSON.parse(fs.readFileSync('config/config.json')); // read config
 api_key = config.api_key;
-players = config.players;
+players = config.teams[0].players;
 
 // print ascii art to console
 figlet('LEAGUE OF LEGENDS', function(err, data) {
@@ -68,7 +70,7 @@ function check_is_in_game(summoner, spinner) {
 	return;
 }
 
-for (var i = 0; i < players.length; i++) {
+for (var i = 0; i < 1/*players.length*/; i++) {
 	var obj = new Spinner({
 	    text: "checking if [" +players[i].name+", "+players[i].region+ "] is in an active game.%s",
 	    stream: process.stderr,
