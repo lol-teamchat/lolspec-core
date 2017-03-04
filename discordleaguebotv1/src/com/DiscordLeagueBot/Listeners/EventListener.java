@@ -31,6 +31,7 @@ import static java.lang.Thread.sleep;
 public class EventListener extends ListenerAdapter {
 
 
+	public String rand;
     @Override
     public void onGuildJoin(GuildJoinEvent e) {
         DiscordLeagueBot.serverSettings.put(e.getGuild().getId(), new ServerSettings(e.getGuild()));
@@ -47,61 +48,11 @@ public class EventListener extends ListenerAdapter {
 
     @Override
     public void onGuildVoiceJoin(GuildVoiceJoinEvent e) {
-    	//THE BOT'S ID
-    	//System.out.println(e.getMember().getUser().getId());
-        if(e.getMember().getUser().getId().equals("279413450784899072")){
-    		File dest = null;
-            try {
-
-                if (new File("recording/").exists())
-                    dest = new File("recording/timestamp" + ".txt");
-                else
-                    dest = new File("recording/timestamp" + ".txt");
-                
-            }
-            catch (Exception ex) {
-                ex.printStackTrace();
-            }
-            
-            try(  PrintWriter outfile = new PrintWriter(dest)  ){
-                outfile.print("Guild: " + e.getGuild().toString() + " ");
-                outfile.println("Time_Joined_Channel: " + OffsetDateTime.now());
-            }
-           
-            catch (Exception ex) {
-                ex.printStackTrace();
-            }
-        }
-        
         return;
     }
 
     @Override
     public void onGuildVoiceLeave(GuildVoiceLeaveEvent e) {
-    	
-    	//bot's ID
-        if(e.getMember().getUser().getId().equals("279413450784899072")){
-    		File dest = null;
-	    	try {
-	
-	            if (new File("recording/").exists())
-	                dest = new File("recording/timestamp" + ".txt");
-	            else
-	                dest = new File("recording/timestamp" + ".txt");
-	            
-	        }
-	        catch (Exception ex) {
-	            ex.printStackTrace();
-	        }
-	        try(  PrintWriter outfile = new PrintWriter(new FileOutputStream (dest,true))  ){
-	            outfile.append("Guild: " + e.getGuild() + " ");
-	            outfile.append("Time_Left_Channel: " + OffsetDateTime.now());
-	        }
-	        
-	        catch (Exception ex) {
-	            ex.printStackTrace();
-	        }
-        }
         return;
     }
 

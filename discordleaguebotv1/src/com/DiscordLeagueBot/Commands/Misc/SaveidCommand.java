@@ -6,10 +6,8 @@ import com.DiscordLeagueBot.DiscordLeagueBot;
 public class SaveidCommand implements Command {
     @Override
     public void action(String[] args) {
-    		DiscordLeagueBot.in_vc = false;
             DiscordLeagueBot.writeToFile(DiscordLeagueBot.api.getGuildById(args[0]));
-            DiscordLeagueBot.leaveVoiceChannel(DiscordLeagueBot.api.getGuildById(args[0]).getAudioManager().getConnectedChannel());
-            
+            DiscordLeagueBot.leaveVoiceChannel(DiscordLeagueBot.api.getGuildById(args[0]).getAudioManager().getConnectedChannel());   
     }
     
     @Override

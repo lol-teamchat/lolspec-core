@@ -5,6 +5,9 @@ import java.io.FileReader;
 import java.io.IOException;
 import com.DiscordLeagueBot.DiscordLeagueBot;
 import com.DiscordLeagueBot.Commands.Command;
+import com.DiscordLeagueBot.Listeners.AudioReceiveListener;
+import com.DiscordLeagueBot.Listeners.UserSpeakingListener;
+
 import net.dv8tion.jda.core.entities.VoiceChannel;
 
 
@@ -52,9 +55,11 @@ public class JoinidCommand implements Command {
 		} catch (IOException e2) {
 			e2.printStackTrace();
 		}
-		
 		DiscordLeagueBot.joinVoiceChannel(vc,true);
-		DiscordLeagueBot.in_vc = true;
+		AudioReceiveListener ah = (AudioReceiveListener) DiscordLeagueBot.api.getGuildById(args[0]).getAudioManager().getReceiveHandler();
+		UserSpeakingListener usl = new UserSpeakingListener(vc, ah.rand);
+		//System.out.println(DiscordLeagueBot.api.getGuildById(args[0]).getAudioManager().toString());
+		DiscordLeagueBot.api.getGuildById(args[0]).getAudioManager().setConnectionListener(usl);
     }
 	@Override
 	public String usage() {

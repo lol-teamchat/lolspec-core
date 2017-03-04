@@ -14,6 +14,7 @@ child.stdout.on('data', (data) => {
     //only happens when the bot boots up
     if(proctab[0] == "start"){
       proctab.shift();
+	  //return; only if we dont want to continue
     }
     child.stdin.write(proctab[0],"utf-8",proctab.shift());
   }
