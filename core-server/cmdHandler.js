@@ -1,10 +1,11 @@
 var spawn = require('child_process').spawn;
 var child; //= spawn('java', ['-jar', 'LeagueReplayComplete.jar']);
 var proctab = [];
+var once = true;
 //console.log('stdout: ' + stdout);awdawd
 //console.log('stderr: ' + stderr);
 
-exports.startDiscordBot = function() {
+exports.startDiscordBot = function(done) {
 	child = spawn('java', ['-jar', './LeagueReplayComplete.jar']);
 	proctab = ["start"]; //= ["start"];
 
@@ -13,15 +14,20 @@ exports.startDiscordBot = function() {
 	})
 
 	child.stdout.on('data', (data) => {
-	//console.log(`stdout: ${data}`);		
+	//console.log(`stdout: ${data}`);
 	  //when stdout gets an "ended current process" message, execute first in queue
-	  if(`${data}`.match("Ended current process")){
+	  if(`${data}`.match("Ended current process")) {
+		if (once) {
+			done();
+			once = false;
+		}
+
 	    if (!proctab[0]){
 	      return;
 	    }
 	    //only happens when the bot boots up
 	    if(proctab[0] == "start"){
-		  console.log("starting discord bot");
+		  console.log("discord bot initiated");
 	      proctab.shift();
 		  return;
 	    }
@@ -36,7 +42,6 @@ exports.startDiscordBot = function() {
 	child.on('close', (code) => {
 	 // 0+2 console.log(`child process exited with code ${code}`);
 	});
-
 }
 
 //pushes the command to the queue
