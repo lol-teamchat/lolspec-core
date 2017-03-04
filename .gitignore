@@ -1,10 +1,12 @@
 server/node_modules
 /lol-ob
 config.json
-discordleaguebotv1/token_loc
-discordleaguebotv1/settings.json
+server/token_loc
+server/names
+server/settings.json
+server/config
 discordleaguebotv1/bin/
-discordleaguebotv1/recordings/
+server/recordings/
 .metadata/
 .recommenders/
 discordleaguebotv1/.settings/
