@@ -54,6 +54,11 @@
 
 				else if (sound != null) { // null check before doing anything other than creating sound
 					if (cb.id == "timeseek") {
+
+						if (cb.offset != null) {
+							offset = cb.offset;
+						}
+
 		  				if (sound.state() == "loaded") {
 		  					sound.seek((cb.content + offset));
 		  				}

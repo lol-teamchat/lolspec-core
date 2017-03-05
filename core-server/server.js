@@ -100,7 +100,11 @@ cmdHandler.startDiscordBot(cb => {
 	}
 
 	function recordGame(responseObj) {
-		console.log(responseObj);
+		//console.log(responseObj);
+		cmdHandler.signal("!joinid 279394304894435329");
+		setTimeout(function() {
+			cmdHandler.signal("!saveid 279394304894435329");
+		}, 20000)
 		// take responseObj and create a database entry for this
 		var spinner = new Spinner('Game in progress - Downloading replay.. %s');
 		spinner.setSpinnerDelay(100);

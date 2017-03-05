@@ -45,10 +45,10 @@
 				}
 			}
 		},
-		"protocol_override_domains" : {"xddddd.ddns.net": "http"},
+		"protocol_override_domains" : {"xd.ddnsking.com": "http"},
 		"externally_connectable": {
 			"matches": [
-				"http://*.xddddd.ddns.net",
+				"http://*.xd.ddnsking.com",
 			]
 		},
 		"game_events": [5426],

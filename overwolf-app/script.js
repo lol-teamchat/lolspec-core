@@ -19,8 +19,15 @@ $(document).ready(function() {
   // Handler for .ready() called.
 	// which features we are interested in receiving from the provider
 	var features = [
-		'matchState',
-		'teams'
+		'summoner_info',
+		// 'gameMode',
+		'teams', // only works in spectator mode
+		'matchState'
+		// 'spellsAndAbilities',
+		// 'deathAndRespawn',
+		// 'kill',
+		// 'assist',
+		// 'minions'
 	];
 
 	function setFeatures(numRetries) {
@@ -35,20 +42,74 @@ $(document).ready(function() {
 				window.setTimeout(function() {setFeatures(numRetries + 1)}, 2000);
 				return;
 			}
-			console.log("Set required features:");
+			console.log("Set required features", features);
 		});
 	}
 
-	//var replayBegan1 = 1488340509000;
-	//var audioBegan1 = Date.parse("2017-02-28T19:53:38.306-08:00");
-	//var replayBegan2 = 1488402675490;
-	//var audioBegan2 = Date.parse("2017-03-01T13:09:29.948-08:00");
+	function registerEvents() {
+		// general events errors
+		overwolf.games.events.onError.addListener(function(info) {
+			console.log("Error: ", info);
+		});
+
+		// "static" data changed (total kills, username, steam-id)
+		// This will also be triggered the first time we register
+		// for events and will contain all the current information
+		overwolf.games.events.onInfoUpdates2.addListener(function(info) {
+			console.log(info);
+			if (info.feature == "matchState") {
+				if (info.info.game_info.matchStarted == "True") {
+					var currentTimestamp = new Date().getTime();
+					//console.log("match probably started at: ", currentTimestamp);
+					if (audiosync.initialized() == true) {
+						// initialize the beginning of the (watching) match with the plugin
+						audiosync.get().setMatchStartTime(currentTimestamp, function(callback) {
+							console.log(callback);
+							 // maybe calculate the new offset here?
+
+							// tell window to play audio
+							overwolf.windows.getOpenWindows( function(cb) {
+								if (cb.audio != null) {
+									overwolf.windows.sendMessage("audio", "play", offset, function(cb) {
+										console.log("sent play message")
+										//$('.audioDemo')[0].currentTime = offset + newtime;
+									})
+								}
+							})
+						})
+					}
+				}
+			}
+
+			if (info.feature == "teams") {
+				console.log("teams", new Date().getTime());
+				// do some other stuff here TODO
+				var info = info.info.game_info.teams;
+				var decoded = JSON.parse(decodeURI(info));
+
+				var red_team = decoded.splice(5)
+				var blue_team = decoded;
+
+				console.log("blue_team = ", blue_team);
+				console.log("red_team = ", red_team);
+			}
+		});
+
+		// an event is triggered
+		overwolf.games.events.onNewEvents.addListener(function(info) {
+			console.log("EVENT FIRED: ", info);
+		});
+
+		console.log("finished registering events");
+	}
+
 	var replayBegan = 1488489461479;
-	var audioBegan = Date.parse("2017-03-02T13:17:02.591-08:00");
+	var audioBegan = 12912983712;
 	var offsetMillis = replayBegan-audioBegan;
 	//var mp3RecordingNullTime = 60;
-	var mp3RecordingNullTime = 6;
-	var offset = offsetMillis/1000 + mp3RecordingNullTime;
+	var offsetBeforeSeeking = 2;
+	var offset = offsetMillis/1000 - offsetBeforeSeeking;
+	var first_timeseek = true;
 
 	var audiosync = new OverwolfPlugin("audiosync", true);
 	audiosync.initialize(function(status) {
@@ -60,100 +121,81 @@ $(document).ready(function() {
 
 		console.log("audiosync plugin is initialized");
 
+		var args;
+
 		audiosync.get().getLeagueArgs(cb => {
-			console.log("command line args", cb);
-		})
 
-		audiosync.get().isPlayingReplay(cb => {
-			if (cb == true) {
-				// have the plugin determine the command line arguments of league of legends
-				// then obtain the url of the corresponding game's mp3 file
-				// audiosync.get().gameURL(function(cb) {
-				// })
-				var matchId = 2438328569;
-				//var mp3_src1 = "http://xddddd.ddns.net/lolspec/uKTtTpLHnDv5O.mp3";
-				//var mp3_src2 = "http://xddddd.ddns.net/lolspec/pb3Q8I7Zu3Laq.mp3";
-				var mp3_src = "http://xddddd.ddns.net/lolspec/6DcbUxnNrGRdN.mp3"
-				// Clear listener after first call.
+			args = cb;
 
-				overwolf.windows.obtainDeclaredWindow("audio", function(cb) {
+			audiosync.get().isPlayingReplay(playing => {
+				if (playing == true) {
+					// have the plugin determine the command line arguments of league of legends
+					// then obtain the url of the corresponding game's mp3 file
+					// audiosync.get().gameURL(function(cb) {
+					// })
+					var matchId = 2438328569;
+					//var mp3_src1 = "http://xddddd.ddns.net/lolspec/uKTtTpLHnDv5O.mp3";
+					//var mp3_src2 = "http://xddddd.ddns.net/lolspec/pb3Q8I7Zu3Laq.mp3";
+					var mp3_src = "http://xddddd.ddns.net/lolspec/6DcbUxnNrGRdN.mp3"
+					// Clear listener after first call.
 
-					// open audio window
-					overwolf.windows.restore("audio", function(cb) {
-						console.log("audio widow created", cb);
-						// configure howler in audio window
-						overwolf.windows.getOpenWindows(output => {
+					overwolf.windows.obtainDeclaredWindow("audio", function(cb) {
 
-							overwolf.windows.sendMessage("audio", "file_info", {src: mp3_src, offset: offset}, function(cb) {
-								console.log("howler initiated", cb);
-								//$('.audioDemo')[0].currentTime = offset + newtime;
+						// open audio window
+						overwolf.windows.restore("audio", function(cb) {
+							console.log("audio widow created", cb);
+							// configure howler in audio window
+							overwolf.windows.getOpenWindows(output => {
 
-								audiosync.get().onTimeSeek.addListener(function(newtime) {
-									console.log("timeseek", newtime);
+								overwolf.windows.sendMessage("audio", "file_info", {src: mp3_src, offset: offset}, function(cb) {
+									console.log("howler initiated", cb);
+									//$('.audioDemo')[0].currentTime = offset + newtime;
 
-									overwolf.windows.sendMessage("audio", "timeseek", newtime, function() {
-										console.log("timeseek sent", newtime);
-										//$('.audioDemo')[0].currentTime = offset + newtime;
+									// user inputs a timeseek
+									audiosync.get().onTimeSeek.addListener(function(newtime) {
+										console.log("timeseek", newtime);
+
+										// only do this on the first timeseek
+										if (first_timeseek == true) {
+											first_timeseek = false;
+
+											// change the offset now by 1
+											offset -= 1;
+										}
+										overwolf.windows.sendMessage("audio", "timeseek", {newtime: newtime, offset: offset}, function() {
+											console.log("timeseek sent", newtime);
+											//$('.audioDemo')[0].currentTime = offset + newtime;
+										})
 									})
 								})
 							})
-						})
-					});
-				})
-			}
-			else { //not playing a replay and the plugin is reaady
-				// TODO maybe some non-replay features or something?
-			}
+						});
+					})
+				}
+				else { //not playing a replay and the plugin is reaady
+					// TODO maybe some non-replay features or something?
+				}
+			})
 		})
 
 		// notofications when the game starts and finishes
-		overwolf.games.events.onInfoUpdates2.addListener(function(infoUpdateChange) {
-			//console.log("info update:", infoUpdateChange);
-			if (infoUpdateChange.feature == "matchState") {
+		// overwolf.games.events.onInfoUpdates2.addListener(function(infoUpdateChange)
 
-				if (infoUpdateChange.info.game_info.matchStarted == "True") {
-					var currentTimestamp = new Date().getTime();
-					if (audiosync.initialized() == true) {
-						// initialize the beginning of the (watching) match with the plugin
-						audiosync.get().setMatchStartTime(currentTimestamp, function(callback) {
-							console.log(callback);
-
-							// maybe calculate the new offset here?
-
-							// tell window to play audio
-							overwolf.windows.getOpenWindows(cb=>{
-								if (cb.audio != null) {
-									overwolf.windows.sendMessage("audio", "play", offset, function(cb) {
-										console.log("sent play message")
-										//$('.audioDemo')[0].currentTime = offset + newtime;
-									})
-								}
-							})
-						});
-					}
-				}
-			}
-
-			if (infoUpdateChange.feature == "teams") {
-				// do some other stuff here TODO
-				var info = infoUpdateChange.info.game_info.teams;
-				var decoded = JSON.parse(decodeURI(info));
-
-				var red_team = decoded.splice(5)
-				var blue_team = decoded;
-
-				console.log("blue_team = ", blue_team);
-				console.log("red_team = ", red_team);
-			}
-		})
-
-		setFeatures(1);
-
-		// if the game is terminated
+		// called whenever the game window is changed
 		overwolf.games.onGameInfoUpdated.addListener(function(gameInfoChangeData) {
+			console.log("GameInfoUpdated");
+
+			// handle window size changes here -- tell overlay where to go
+			// TODO
+
+			// a game info was updated but the gameInfo is null
 			if (gameInfoChangeData.gameInfo == null) {
 				closeWindow();
+				console.log("game closed");
 			}
 		})
+
+		registerEvents();
+		setFeatures(1);
 	});
 });

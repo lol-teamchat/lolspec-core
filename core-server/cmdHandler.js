@@ -44,8 +44,13 @@ exports.startDiscordBot = function(done) {
 	});
 }
 
+exports.stopBot = function() {
+	// TODO
+}
+
 //pushes the command to the queue
 exports.signal = function(str) {
+	str+="\n";
   if(!proctab[0]){
     proctab.push(str);
     child.stdin.write(proctab[0],"utf-8",proctab.shift());
