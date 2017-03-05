@@ -22,6 +22,7 @@ import javax.security.auth.login.LoginException;
 import javax.sound.sampled.AudioFormat;
 import java.io.*;
 import java.lang.management.ManagementFactory;
+import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.*;
 import java.util.List;
@@ -227,7 +228,7 @@ public class DiscordLeagueBot
         
         try(  PrintWriter outfile = new PrintWriter(dest)  ){
             outfile.println("Guild: " + vc.getGuild().toString() + " ");
-            outfile.println("Time_Joined_Channel: " + OffsetDateTime.now());
+            outfile.println("Time_Joined_Channel: " + Instant.now().toEpochMilli());
             outfile.close();
         } catch (FileNotFoundException e) {
 			e.printStackTrace();
@@ -252,7 +253,7 @@ public class DiscordLeagueBot
         }
         try(  PrintWriter outfile = new PrintWriter(new FileOutputStream (dest,true))  ){
             outfile.println("Guild: " + vc.getGuild() + " ");
-            outfile.append("Time_Left_Channel: " + OffsetDateTime.now());
+            outfile.append("Time_Left_Channel: " + Instant.now().toEpochMilli());
             outfile.close();
         }
         

@@ -4,7 +4,7 @@ package com.DiscordLeagueBot.Listeners;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.PrintWriter;
-import java.time.OffsetDateTime;
+import java.time.Instant;
 
 import net.dv8tion.jda.core.audio.hooks.ListenerProxy;
 import net.dv8tion.jda.core.entities.User;
@@ -37,7 +37,7 @@ public class UserSpeakingListener extends ListenerProxy
 		if (vc.getMembers().toString().contains(arg0.getName())){
 
 			try(  PrintWriter outfile = new PrintWriter(new FileOutputStream (dest,true))  ){
-                outfile.println(arg0.toString() + " speaking = " + arg1 + " " + OffsetDateTime.now().toOffsetTime() + '\n');
+                outfile.println(arg0.toString() + " speaking = " + arg1 + " " + Instant.now().toEpochMilli() + '\n');
                 outfile.close();
             }
             catch (Exception ex) {
