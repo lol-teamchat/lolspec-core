@@ -40,12 +40,10 @@ public class UserSpeakingListener extends ListenerProxy
                 outfile.println(arg0.toString() + " speaking = " + arg1 + " " + OffsetDateTime.now().toOffsetTime() + '\n');
                 outfile.close();
             }
-           
             catch (Exception ex) {
                 ex.printStackTrace();
             }
 			
 		}
-			System.out.println(arg0.getName() + "is speaking" + arg1);
 	}
 }
