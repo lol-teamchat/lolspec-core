@@ -17,6 +17,10 @@ public class AudioSendListener implements AudioSendHandler
             voiceData[i] = Arrays.copyOfRange(data, i * 3840, i * 3840 + 3840);
         }
     }
+    
+    public AudioSendListener(String url) {
+    	
+    }
 
     @Override
     public boolean canProvide() {

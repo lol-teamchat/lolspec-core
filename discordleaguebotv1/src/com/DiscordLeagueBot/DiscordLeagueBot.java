@@ -6,7 +6,6 @@ import com.DiscordLeagueBot.Commands.Misc.LeaveCommand;
 import com.DiscordLeagueBot.Commands.Misc.SaveidCommand;
 import com.DiscordLeagueBot.Configuration.ServerSettings;
 import com.DiscordLeagueBot.Listeners.AudioReceiveListener;
-import com.DiscordLeagueBot.Listeners.AudioSendListener;
 import com.DiscordLeagueBot.Listeners.EventListener;
 import com.google.gson.Gson;
 import net.dv8tion.jda.core.JDA;
@@ -23,9 +22,7 @@ import javax.sound.sampled.AudioFormat;
 import java.io.*;
 import java.lang.management.ManagementFactory;
 import java.time.Instant;
-import java.time.OffsetDateTime;
 import java.util.*;
-import java.util.List;
 
 public class DiscordLeagueBot
 {
@@ -121,7 +118,47 @@ public class DiscordLeagueBot
             ex.printStackTrace();
         }
     }
-
+    
+    // will use something similar in the future
+   /* public static void writeNames(GuildJoinEvent e){
+    	try{
+    		File dest = null;
+    		try {
+    			dest = new File ("names");                
+            }
+            catch (Exception ex) {
+                ex.printStackTrace();
+            }
+    		FileReader fr = new FileReader("names");
+            BufferedReader br = new BufferedReader(fr);
+            String currname;
+            List <String> namesInGuild;
+            List <String> NamesMatching;
+            int j = 0;
+    		
+            try(  PrintWriter outfile = new PrintWriter(new FileOutputStream (dest,true))  ){
+    		for (Member i : (Member []) e.getGuild().getMembers().toArray()){
+    			namesInGuild.add(i.getUser().getName());
+    			System.out.println("array of names in guild: " + namesInGuild.toString());
+    		}  		        	
+    		        	 while((currname = br.readLine()) != null){
+    		     		        if(!namesInGuild.contains(currname)){
+    		     		        	NamesMatching.add(currname);
+    		     		        }
+    			
+                    outfile.println(i.getUser().getId().toString() + '\n');
+                    outfile.close();
+           }
+                catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+    		}
+            br.close();
+            fr.close();
+    	}
+    }
+    
+*/
 
     public static void writeSettingsJson() {
         try {
@@ -177,12 +214,12 @@ public class DiscordLeagueBot
             g.getAudioManager().setReceivingHandler(null);
         }
 
-        AudioSendListener sh = (AudioSendListener) g.getAudioManager().getSendingHandler();
-        if (sh != null) {
-            sh.canProvide = false;
-            sh.voiceData = null;
+        //AudioSendListener sh = (AudioSendListener) g.getAudioManager().getSendingHandler();
+        //if (sh != null) {
+        //    sh.canProvide = false;
+         //   sh.voiceData = null;
             g.getAudioManager().setSendingHandler(null);
-        }
+       // }
 
         System.out.println("Destroyed audio handlers for " + g.getName());
         System.gc();
