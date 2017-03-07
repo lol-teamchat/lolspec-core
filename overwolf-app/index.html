@@ -4,15 +4,18 @@
 		<script src="js/jquery.min.js"></script>
 		<link rel="stylesheet" href="style.css" />
 		<meta content="text/html; charset=utf-8" http-equiv="Content-Type">
-		<title>LoL Spectate</title>
+		<title>TeamChat</title>
 	</head>
 
 	<body>
 		<div id="topBar" align="right" onmousedown="dragMove();">
-			<a class="topBar-element" onclick="minimizeWindow();" >_</a>
-			<a class="topBar-element" onclick="closeWindow();" >X</a>
+			<div class="teamchat-logo-left">
+				<!-- logo here -->
+			</div>
+			<img class="topBar-element" src="img/settings.svg" onclick="openSettings();"/>
+			<img class="topBar-element" src="img/close.svg" onclick="closeWindow();"/>
 		</div>
-		<div id="content" style='width:100%; height: calc(100% - 60px);'></div>
+		<div id="content" style='width:100%; height: calc(100% - 68px);'></div>
 		<div id="bottomBar" align="right" onmousedown="dragMove();">
 	</body>
 
@@ -41,6 +44,7 @@
 
 		if (location.href.indexOf('gamelaunchevent') == -1) { // not being launched by launch_events
 			var authKey = localStorage.getItem("accessKey");
+			console.log("authKey = ", authKey);
 			$(document).ready(function() {
 				$('#content').append("<iframe style='width:100%; height:100%;' src='http://teamchat.lol'#"+authKey+"'></iframe>");
 			})
@@ -52,7 +56,7 @@
 		}
 	</script>
 
-	<script type="text/javascript" src="login.js"></script>
+	<script type="text/javascript" src="settings.js"></script>
 	<script type="text/javascript" src="overwolfplugin.js"></script>
 	<script type="text/javascript" src="script.js"></script>
 </html>

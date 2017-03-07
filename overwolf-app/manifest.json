@@ -2,12 +2,12 @@
 	"manifest_version":"1",
 	"type":"WebApp",
 	"meta":{
-		"name":"lolspec",
+		"name":"TeamChat",
 		"version":"1.1.0.2",
 		"minimum-overwolf-version": "0.85.0.0",
-		"author":"lolspec team",
-		"icon":"lolspec-icon.png",
-		"icon_gray":"lolspec-icon-grey.png",
+		"author":"TeamChat team",
+		"icon":"img/lolspec-icon.png",
+		"icon_gray":"img/lolspec-icon-grey.png",
 		"description":"listen to recorded voice in League of Legends"
 	},
 	"permissions": ["Extensions", "GameInfo"],
@@ -21,7 +21,14 @@
 		        "show_in_taskbar": true,
 		        "grab_keyboard_focus": false,
 				"in_game_only": false,
-
+				"size": {
+					"width": 800,
+					"height": 600
+				},
+				"start_position": {
+					"Top": 500,
+					"Left": 200
+				}
 			},
 			"audio": {
 				"file": "audio.html",
@@ -37,12 +44,28 @@
 					"Top": 500,
 					"Left": 300
 				}
+			},
+			"settings": {
+				"file":"settings.html",
+				"transparent": true,
+				"resizable": false,
+				"show_in_taskbar": false,
+				"disable_restore_animation": true,
+				"desktop_only": false,
+				"size": {
+					"width": 250,
+					"height": 250
+				},
+				"start_position": {
+					"top": 100,
+					"left": 100
+				}
 			}
 		},
-		"protocol_override_domains" : {"xd.ddnsking.com": "http"},
+		"protocol_override_domains" : {"teamchat.lol": "http"},
 		"externally_connectable": {
 			"matches": [
-				"http://*.xd.ddnsking.com",
+				"http://*.teamchat.lol",
 			]
 		},
 		"game_events": [5426],

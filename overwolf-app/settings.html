@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<script src="js/jquery.min.js"></script>
+		<link rel="stylesheet" href="style.css" />
+		<meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+		<title>settings</title>
+	</head>
+
+	<body>
+		<div id="topBar" align="right" onmousedown="dragMove();">
+			<div class="teamchat-logo-left">
+				<!-- logo here -->
+			</div>
+			<img class="topBar-element" src="img/close.svg" onclick="closeWindow();"/>
+		</div>
+		<div id="content" style='width:100%; height: calc(100% - 68px);'></div>
+		<div id="bottomBar" align="right" onmousedown="dragMove();">
+	</body>
+
+	<script>
+		function dragMove(){
+			overwolf.windows.getCurrentWindow(function(result){
+				if (result.status=="success"){
+					overwolf.windows.dragMove(result.window.id);
+				}
+			});
+		};
+		function closeWindow(){
+			overwolf.windows.getCurrentWindow(function(result){
+				if (result.status=="success"){
+					overwolf.windows.close(result.window.id);
+				}
+			});
+		};
+	</script>
+</html>

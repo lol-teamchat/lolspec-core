@@ -1,10 +1,10 @@
 # TeamChat
 
-##Official Site: Teamchat.lol
+##Official Site: http://teamchat.lol/ 
 
 ##Steps to get the application working:
 
-1. Create an account on our site, http://Teamchat.lol/ 
+1. Create an account on our site
 2. fill out all required fields, then click the link to invite our bot "Janna" to your discord server
 3. Install Overwolf, and make an account
 4. Download our overwolf app opk (until it gets registered on Overwolf, can be found on website)

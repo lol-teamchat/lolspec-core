@@ -53,68 +53,6 @@ function recordGame(responseObj) {
 app.get('/match/', function (req, res) {
 	console.log(req.query)
 	authenticate(req.query.key, function(user){
-		var returnData = {authenticated: false, teams: []}
-		if (user.loggedIn){
-			returnData.authenticated = true
-			var summonerids = ''
-			var currTeam = 0
-			var push = false
-
-			var team = {}
-			team.players = []
-			db.query('select p.*, t.team_name from teams t left outer join players p on t.id = p.team_id where t.owner = ? order by t.id', [user.id])
-			.on('result', function(data){
-
-				if (data.team_id != currTeam){
-
-					if (currTeam > 0){
-						summonerids = summonerids.substring(0, summonerids.length-1)
-						console.log(summonerids)
-						unirest.get('https://na.api.pvp.net/api/lol/na/v1.4/summoner/'+summonerids+'?api_key='+config.riot_api)
-						.headers({'Accept': 'application/json', 'Content-Type': 'application/json'})
-						.end(function (response) {
-							var summonersData = response.body
-							for (var i = 0; i < summonersData.length; i++){
-								team.players[i].summoner_data = summonersData[i]
-							}
-							returnData.teams.push(team)
-							currTeam = data.team_id
-							team = {}
-							team.players = []
-						});
-					}
-				}
-				team.id = data.team_id
-				team.name = data.team_name
-				team.players.push({dbname: data.name, sumid: data.summoner_id})
-				summonerids += data.summoner_id+','
-			})
-			.on('end', function(){
-
-				summonerids = summonerids.substring(0, summonerids.length-1)
-				console.log(summonerids)
-				unirest.get('https://na.api.pvp.net/api/lol/na/v1.4/summoner/'+summonerids+'?api_key='+config.riot_api)
-				.headers({'Accept': 'application/json', 'Content-Type': 'application/json'})
-				.end(function (response) {
-					//console.log(response.body)
-					var summonersData = response.body;
-					for (sum in summonersData){
-						for (var i = 0; i < team.players.length; i++){
-							if (team.players[i].sumid == summonersData[sum].id){
-								team.players[i].summoner_data = summonersData[sum]
-							}
-						}
-
-					}
-					returnData.teams.push(team)
-					res.send(returnData)
-
-				});
-			})
-		}
-		else{
-			res.send(returnData)
-		}
 
 	})
 })

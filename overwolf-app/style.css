@@ -15,7 +15,7 @@ body {
 	border-top-right-radius: 10px;
 	border-top-left-radius: 10px;
 	background: black;
-	height: 30px;
+	height: 38px;
 	cursor: default;
 }
 
@@ -27,12 +27,21 @@ body {
 	cursor: default;
 }
 
-.topBar-element {
-	padding-left: 10px;
-	padding-right: 10px;
-	color: white;
-	top: 5px;
+.teamchat-logo-left {
+	width: 100px;
 	position: relative;
+	height: inherit;
+	background-color: grey;
+	float: left;
+	border-top-left-radius: 10px;
+}
+
+.topBar-element {
+	margin-right: 10px;
+	top: 9px;
+	position: relative;
+	width: 20px;
+	cursor: pointer;
 }
 
 #resizeGripTop {

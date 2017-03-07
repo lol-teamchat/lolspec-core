@@ -45,7 +45,14 @@ $(document).ready(function() {
 		});
 
 		overwolf.games.events.onInfoUpdates2.addListener(function(info) {
-			console.log(info);
+			//console.log(info);
+
+			if (info.feature == "summoner_info") {
+				if (info.info.summoner_info.id != null) {
+					console.log("summoner id: ", info.summoner_info.id)
+				}
+			}
+
 			if (info.feature == "matchState") { // a matchState event is triggered
 				if (info.info.game_info.matchStarted == "True") {
 					var currentTimestamp = new Date().getTime();
