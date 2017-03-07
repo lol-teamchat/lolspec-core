@@ -3,7 +3,7 @@
 	"type":"WebApp",
 	"meta":{
 		"name":"lolspec",
-		"version":"1.1.0.0",
+		"version":"1.1.0.2",
 		"minimum-overwolf-version": "0.85.0.0",
 		"author":"lolspec team",
 		"icon":"lolspec-icon.png",
@@ -17,25 +17,18 @@
 			"index":{
 				"file":"index.html",
 				"transparent": true,
-		        "resizable": false,
+		        "resizable": true,
 		        "show_in_taskbar": true,
 		        "grab_keyboard_focus": false,
 				"in_game_only": false,
-				"size": {
-					"width": 400,
-					"height": 400
-				},
-				"start_position": {
-					"Top": 100,
-					"Left": 300
-				}
+
 			},
 			"audio": {
 				"file": "audio.html",
 				"transparent":true,
-				"resizable":true,
-				"show_in_taskbar": true,
-				"in_game_only": false,
+				"resizable":false,
+				"show_in_taskbar": false,
+				"in_game_only": true,
 				"size": {
 					"width": 400,
 					"height": 400

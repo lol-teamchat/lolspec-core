@@ -1,7 +1,7 @@
 ﻿html {
+    background-color: transparent;
 	height: 100%;
 	width: 100%;
-	background: rgba(255, 255, 255, 1);
 	overflow: hidden;
 }
 
@@ -9,6 +9,30 @@ body {
 	height: 100%;
 	width: 100%;
 	margin: 0px;
+}
+
+#topBar {
+	border-top-right-radius: 10px;
+	border-top-left-radius: 10px;
+	background: black;
+	height: 30px;
+	cursor: default;
+}
+
+#bottomBar {
+	border-bottom-right-radius: 10px;
+	border-bottom-left-radius: 10px;
+	background: black;
+	height: 30px;
+	cursor: default;
+}
+
+.topBar-element {
+	padding-left: 10px;
+	padding-right: 10px;
+	color: white;
+	top: 5px;
+	position: relative;
 }
 
 #resizeGripTop {
