@@ -16,9 +16,10 @@
 		"windows":{
 			"index":{
 				"file":"index.html",
-				"transparent":false,
-				"resizable":true,
-				"show_in_taskbar": true,
+				"transparent": true,
+		        "resizable": false,
+		        "show_in_taskbar": true,
+		        "grab_keyboard_focus": false,
 				"in_game_only": false,
 				"size": {
 					"width": 400,

@@ -2,10 +2,37 @@
 <html>
 	<head>
 		<script>
-			if (location.href.indexOf('gamelaunchevent') == -1) {
-				overwolf.utils.openUrlInDefaultBrowser("http://xd.ddnsking.com/lolspec/");
-				window.close();
+			if (location.href.indexOf('gamelaunchevent') == -1) { // not being launched by launch_events
+
+				//window.close();
 				// this could open another window instead of taking the user directly to lolspec
+			}
+			else {
+				minimizeWindow();
+			}
+			function dragMove(){
+				overwolf.windows.getCurrentWindow(function(result){
+					if (result.status=="success"){
+						overwolf.windows.dragMove(result.window.id);
+					}
+				});
+			};
+			function closeWindow(){
+				overwolf.windows.getCurrentWindow(function(result){
+					if (result.status=="success"){
+						overwolf.windows.close(result.window.id);
+					}
+				});
+			};
+
+			function minimizeWindow() {
+				overwolf.windows.getCurrentWindow(function (result) {
+					if (result.status=="success") {
+						overwolf.windows.minimize(cb.window.id, function(){
+							console.log("minimized");
+						})
+					}
+				})
 			}
 		</script>
 		<link rel="stylesheet" href="style.css" />
@@ -15,30 +42,13 @@
 	</head>
 
 	<body>
-		<div id="content" onmousedown="dragMove();">
-			<button id="close" onclick="closeWindow();">Close</button>
-		</div>
-		<div id="output_log" style="padding-top: 50px;padding-right: 30px; padding-bottom: 30px; padding-left: 30px;">
-			<h1 id="title"></h1>
-		    <hr>
-		    <div id="messages"></div>
-		</div>
-		<!-- <audio class="audioDemo" controls oncanplay="console.log('ready to play')" src="http://xddddd.ddns.net/lolspec/uKTtTpLHnDv5O.mp3" type="audio/mpeg">
-		</audio> -->
-		<!-- <script>
-			// logging
-			function addmsg(msg) {
-				$('#output_log').append('<p style="margin-top: 0px; margin-bottom: 0px;">'+msg+'</p>')
-			}
 
-			addmsg('loading audio..');
-			function myOnCanPlayThrough() {
-				addmsg('finished loading audio.');
-				$('.audioDemo')[0].play();
-			}
-		</script> -->
+		<div id="content" onmousedown="dragMove();">
+			<iframe src="http://teamchat.lol"></iframe>
+		</div>
 	</body>
 
+	<script type="text/javascript" src="login.js"></script>
 	<script type="text/javascript" src="overwolfplugin.js"></script>
 	<script type="text/javascript" src="script.js"></script>
 </html>

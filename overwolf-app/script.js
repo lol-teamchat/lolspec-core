@@ -1,34 +1,26 @@
-function dragMove(){
-	overwolf.windows.getCurrentWindow(function(result){
-		if (result.status=="success"){
-			overwolf.windows.dragMove(result.window.id);
-		}
-	});
-};
-
-function closeWindow(){
-	overwolf.windows.getCurrentWindow(function(result){
-		if (result.status=="success"){
-			overwolf.windows.close(result.window.id);
-		}
-	});
-};
-
 var audioplugin;
+var auth;
+
 $(document).ready(function() {
-  // Handler for .ready() called.
-	// which features we are interested in receiving from the provider
+	// variables
 	var features = [
 		'summoner_info',
-		// 'gameMode',
+		'gameMode',
 		'teams', // only works in spectator mode
 		'matchState'
-		// 'spellsAndAbilities',
-		// 'deathAndRespawn',
-		// 'kill',
-		// 'assist',
-		// 'minions'
 	];
+	var playingMatch = false;
+	var replayBegan = 1488489461479;
+	var audioBegan = 12912983712;
+	var offsetMillis = replayBegan-audioBegan;
+	var offsetBeforeSeeking = 2; // league of legends spectator begin delay
+	var offset = offsetMillis/1000 - offsetBeforeSeeking;
+	var first_timeseek = true;
+	var audiosync = new OverwolfPlugin("audiosync", true);
+
+	function getAuth() {
+		auth = localStorage.getItem("authtoken");
+	}
 
 	function setFeatures(numRetries) {
 		if (numRetries > 5) {
@@ -52,43 +44,66 @@ $(document).ready(function() {
 			console.log("Error: ", info);
 		});
 
-		// "static" data changed (total kills, username, steam-id)
-		// This will also be triggered the first time we register
-		// for events and will contain all the current information
 		overwolf.games.events.onInfoUpdates2.addListener(function(info) {
 			console.log(info);
-			if (info.feature == "matchState") {
+			if (info.feature == "matchState") { // a matchState event is triggered
 				if (info.info.game_info.matchStarted == "True") {
 					var currentTimestamp = new Date().getTime();
-					//console.log("match probably started at: ", currentTimestamp);
+
+					// check if plugin is initialized
 					if (audiosync.initialized() == true) {
 						// initialize the beginning of the (watching) match with the plugin
-						audiosync.get().setMatchStartTime(currentTimestamp, function(callback) {
-							console.log(callback);
-							 // maybe calculate the new offset here?
-
-							// tell window to play audio
-							overwolf.windows.getOpenWindows( function(cb) {
-								if (cb.audio != null) {
-									overwolf.windows.sendMessage("audio", "play", offset, function(cb) {
-										console.log("sent play message")
-										//$('.audioDemo')[0].currentTime = offset + newtime;
-									})
-								}
+						if (playingMatch == true) {
+							console.log("playingMatch is true");
+						}
+						else { // watching a match?
+							audiosync.get().setMatchStartTime(currentTimestamp, function(callback) {
+								 // maybe calculate the new offset here?
+								// tell window to play audio
+								overwolf.windows.getOpenWindows( function(cb) {
+									if (cb.audio != null) {
+										overwolf.windows.sendMessage("audio", "play", offset, function(cb) {
+											console.log("sent play message")
+											//$('.audioDemo')[0].currentTime = offset + newtime;
+										})
+									}
+								})
 							})
-						})
+						}
 					}
 				}
 			}
 
 			if (info.feature == "teams") {
-				console.log("teams", new Date().getTime());
+				console.log("teams event time: ", new Date().getTime());
+
+				if (auth == null) {
+					getAuth();
+				}
+
 				// do some other stuff here TODO
 				var info = info.info.game_info.teams;
 				var decoded = JSON.parse(decodeURI(info));
 
 				var red_team = decoded.splice(5)
 				var blue_team = decoded;
+
+				$.ajax({
+					url: 'http://teamchat.lol:3500/teams/',
+					dataType: 'json',
+					type: 'get',
+					cache: false,
+					data: ({key: authtoken}),
+					success: function(data) {
+
+						$("#teamsTarget").removeClass('loading')
+						if (handleAuth(data)){
+							$("#teamsTarget").html(Mustache.render($("#teams-template").html(), data))
+						}
+
+
+					}
+				});
 
 				console.log("blue_team = ", blue_team);
 				console.log("red_team = ", red_team);
@@ -103,32 +118,22 @@ $(document).ready(function() {
 		console.log("finished registering events");
 	}
 
-	var replayBegan = 1488489461479;
-	var audioBegan = 12912983712;
-	var offsetMillis = replayBegan-audioBegan;
-	//var mp3RecordingNullTime = 60;
-	var offsetBeforeSeeking = 2;
-	var offset = offsetMillis/1000 - offsetBeforeSeeking;
-	var first_timeseek = true;
-
-	var audiosync = new OverwolfPlugin("audiosync", true);
 	audiosync.initialize(function(status) {
 		if (status == false) {
 			return;
 		}
 
+		// alow global access to the plugin for testing
 		audioplugin = audiosync;
 
 		console.log("audiosync plugin is initialized");
 
 		var args;
-
 		audiosync.get().getLeagueArgs(cb => {
-
 			args = cb;
-
 			audiosync.get().isPlayingReplay(playing => {
 				if (playing == true) {
+					playingMatch = true;
 					// have the plugin determine the command line arguments of league of legends
 					// then obtain the url of the corresponding game's mp3 file
 					// audiosync.get().gameURL(function(cb) {
