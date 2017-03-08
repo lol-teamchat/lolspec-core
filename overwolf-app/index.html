@@ -1,44 +1,62 @@
 ﻿<!DOCTYPE html>
 <html>
 	<head>
-		<script>
-			if (location.href.indexOf('gamelaunchevent') == -1) {
-				overwolf.utils.openUrlInDefaultBrowser("http://xd.ddnsking.com/lolspec/");
-				window.close();
-				// this could open another window instead of taking the user directly to lolspec
-			}
-		</script>
+		<script src="js/jquery.min.js"></script>
 		<link rel="stylesheet" href="style.css" />
 		<meta content="text/html; charset=utf-8" http-equiv="Content-Type">
-		<title>LoL Spectate</title>
-		<script src="js/jquery.min.js"></script>
+		<title>TeamChat</title>
 	</head>
 
 	<body>
-		<div id="content" onmousedown="dragMove();">
-			<button id="close" onclick="closeWindow();">Close</button>
+		<div id="topBar" align="right" onmousedown="dragMove();">
+			<div class="teamchat-logo-left">
+				<!-- logo here -->
+			</div>
+			<img class="topBar-element" src="img/settings.svg" onclick="openSettings();"/>
+			<img class="topBar-element" src="img/close.svg" onclick="closeWindow();"/>
 		</div>
-		<div id="output_log" style="padding-top: 50px;padding-right: 30px; padding-bottom: 30px; padding-left: 30px;">
-			<h1 id="title"></h1>
-		    <hr>
-		    <div id="messages"></div>
-		</div>
-		<!-- <audio class="audioDemo" controls oncanplay="console.log('ready to play')" src="http://xddddd.ddns.net/lolspec/uKTtTpLHnDv5O.mp3" type="audio/mpeg">
-		</audio> -->
-		<!-- <script>
-			// logging
-			function addmsg(msg) {
-				$('#output_log').append('<p style="margin-top: 0px; margin-bottom: 0px;">'+msg+'</p>')
-			}
-
-			addmsg('loading audio..');
-			function myOnCanPlayThrough() {
-				addmsg('finished loading audio.');
-				$('.audioDemo')[0].play();
-			}
-		</script> -->
+		<div id="content" style='width:100%; height: calc(100% - 68px);'></div>
+		<div id="bottomBar" align="right" onmousedown="dragMove();">
 	</body>
 
+	<script>
+		function dragMove(){
+			overwolf.windows.getCurrentWindow(function(result){
+				if (result.status=="success"){
+					overwolf.windows.dragMove(result.window.id);
+				}
+			});
+		};
+		function closeWindow(){
+			overwolf.windows.getCurrentWindow(function(result){
+				if (result.status=="success"){
+					overwolf.windows.close(result.window.id);
+				}
+			});
+		};
+		function minimizeWindow() {
+			overwolf.windows.getCurrentWindow(function (result) {
+				if (result.status=="success") {
+					overwolf.windows.minimize(result.window.id);
+				}
+			})
+		}
+
+		if (location.href.indexOf('gamelaunchevent') == -1) { // not being launched by launch_events
+			var authKey = localStorage.getItem("accessKey");
+			console.log("authKey = ", authKey);
+			$(document).ready(function() {
+				$('#content').append("<iframe style='width:100%; height:100%;' src='http://teamchat.lol'#"+authKey+"'></iframe>");
+			})
+			// window.close();
+			// this could open another window instead of taking the user directly to lolspec
+		}
+		else {
+			minimizeWindow();
+		}
+	</script>
+
+	<script type="text/javascript" src="settings.js"></script>
 	<script type="text/javascript" src="overwolfplugin.js"></script>
 	<script type="text/javascript" src="script.js"></script>
 </html>

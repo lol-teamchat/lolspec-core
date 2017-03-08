@@ -1,1 +1,10 @@
 /target/
+bin/
+.settings/
+.metadata/
+.classpath
+.project
+names
+settings.json
+token_loc
+LeagueReplay.jardesc
