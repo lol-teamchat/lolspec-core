@@ -7,3 +7,6 @@ recording/
 test_*/
 test-plugin/
 settings.json
+token_loc
+names
+secret

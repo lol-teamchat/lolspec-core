@@ -1,8 +1,14 @@
 package com.DiscordLeagueBot.Commands.Misc;
 
 import java.io.BufferedReader;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.Statement;
+import java.util.Iterator;
 
 import com.DiscordLeagueBot.DiscordLeagueBot;
 import com.DiscordLeagueBot.Listeners.*;
@@ -16,6 +22,8 @@ import com.sedmelluq.discord.lavaplayer.tools.FriendlyException;
 import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 
+import net.dv8tion.jda.core.entities.Member;
+import net.dv8tion.jda.core.entities.User;
 import net.dv8tion.jda.core.entities.VoiceChannel;
 
 
@@ -68,6 +76,65 @@ public class JoinidCommand implements Command {
 		} catch (IOException e2) {
 			e2.printStackTrace();
 		}
+		
+        FileReader fr;
+        String url = null;
+        String user = null;
+        String password = null;
+		try {
+			fr = new FileReader("secret");
+	        BufferedReader br = new BufferedReader(fr);
+
+			url = br.readLine();
+	        user = br.readLine();
+	        password = br.readLine();
+	        
+	        br.close();
+	        fr.close();
+		} catch (FileNotFoundException e1) {
+			e1.printStackTrace();
+		} catch (IOException e2) {
+			e2.printStackTrace();
+		}
+		
+        User curr = null;
+        System.out.println("Connecting database...");
+
+        try (java.sql.Connection connection = DriverManager.getConnection(url, user, password)) {
+            System.out.println("Database connected!");
+            Statement stmt = connection.createStatement();
+            ResultSet rs = stmt.executeQuery("SELECT * FROM `players` ORDER BY `players`.`discord_id` ASC");
+            
+            while(rs.next() && (rs.getString(4) == null)){
+            String discord_id = rs.getString(4);
+            String discord_name = rs.getString(5);
+            String discord_disc = rs.getString(6);
+            System.out.println("disc id = " + discord_id + "discname = " + discord_name + "discorddisc = " + discord_disc);
+            PreparedStatement ps = connection.prepareStatement("UPDATE players SET discord_id = ? WHERE discord_display_name = ? AND discord_discriminator = ?");
+            Iterator<Member> iter = DiscordLeagueBot.api.getGuildById(args[0]).getMembers().iterator();
+            while (iter.hasNext()){
+            	curr = iter.next().getUser();
+            	if (curr.getName().equalsIgnoreCase(discord_name)){
+            		if (curr.getDiscriminator().equals(discord_disc)){
+            			ps.setString(1,curr.getId());
+            			ps.setString(2,curr.getName());
+            			ps.setString(3,curr.getDiscriminator());
+            			ps.executeUpdate();
+            		    ps.close();
+            		    break;
+            		}
+            	}
+            }
+            
+            }
+        } catch (java.sql.SQLException e1) {
+            throw new IllegalStateException("Cannot connect the database!", e1);
+        }
+
+    	
+
+		
+		
 		
 		DiscordLeagueBot.joinVoiceChannel(vc,true);
 		AudioPlayerManager playerManager = new DefaultAudioPlayerManager();

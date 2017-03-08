@@ -44,6 +44,7 @@ public class DiscordLeagueBot
                     .addListener(new EventListener())
                     .buildBlocking();
             br.close();
+            fr.close();
             
             CommandHandler.commands.put("leave", new LeaveCommand());
             CommandHandler.commands.put("joinid", new JoinidCommand());
@@ -54,7 +55,6 @@ public class DiscordLeagueBot
             
             //starts ConsoleCommandListener, which listens for system.in commands
             com.ConsoleCommand.ConsoleCommandListener.instance.start();
-            
             //this line is required to know when the bot finishes starting up in cmdHandler.js
             System.out.println("Ended current process");
         }

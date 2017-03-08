@@ -10,6 +10,7 @@ public class CommandParser {
 		
 		String[] splitStr = id.split("\\s+");
         ArrayList<String> split = new ArrayList<>();
+        System.out.println(DiscordLeagueBot.api.getGuildById(splitStr[1]).getId());
         String prefix = DiscordLeagueBot.serverSettings.get(DiscordLeagueBot.api.getGuildById(splitStr[1]).getId()).prefix;
         String raw = id;
         String beheaded = raw.replaceFirst(prefix, "");
