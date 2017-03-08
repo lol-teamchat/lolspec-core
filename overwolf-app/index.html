@@ -42,21 +42,21 @@
 			})
 		}
 
-		if (location.href.indexOf('gamelaunchevent') == -1) { // not being launched by launch_events
-			var authKey = localStorage.getItem("accessKey");
-			console.log("authKey = ", authKey);
-			$(document).ready(function() {
-				$('#content').append("<iframe style='width:100%; height:100%;' src='http://teamchat.lol'#"+authKey+"'></iframe>");
-			})
+		if (location.href.indexOf('gamelaunchevent') != -1) { // not being launched by launch_events
+			minimizeWindow();
 			// window.close();
 			// this could open another window instead of taking the user directly to lolspec
 		}
-		else {
-			minimizeWindow();
-		}
+
+		var authKey = localStorage.getItem("accessKey");
+		console.log("authKey = ", authKey);
+		$(document).ready(function() {
+			$('#content').append("<iframe style='width:100%; height:100%;' src='http://teamchat.lol'#"+authKey+"'></iframe>");
+		})
+
 	</script>
 
-	<script type="text/javascript" src="settings.js"></script>
-	<script type="text/javascript" src="overwolfplugin.js"></script>
-	<script type="text/javascript" src="script.js"></script>
+	<script type="text/javascript" src="js/settings.js"></script>
+	<script type="text/javascript" src="js/overwolfplugin.js"></script>
+	<script type="text/javascript" src="js/script.js"></script>
 </html>

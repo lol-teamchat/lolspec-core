@@ -1,8 +1,14 @@
 var audioplugin;
-var auth;
+var key = null;
+
+function getAuth() {
+	return localStorage.getItem("authtoken");
+}
 
 $(document).ready(function() {
 	// variables
+	key = getAuth();
+
 	var features = [
 		'summoner_info',
 		'gameMode',
@@ -18,23 +24,19 @@ $(document).ready(function() {
 	var first_timeseek = true;
 	var audiosync = new OverwolfPlugin("audiosync", true);
 
-	function getAuth() {
-		auth = localStorage.getItem("authtoken");
-	}
-
 	function setFeatures(numRetries) {
-		if (numRetries > 5) {
-			console.log("failed to get features from provider -- exceeded 5 retries");
+		if (numRetries > 500) {
+			console.log("failed to get features from provider -- exceeded 100 retries");
 			return;
 		}
 		overwolf.games.events.setRequiredFeatures(features, (info) => {
 			if (info.status == "error")	{
-				console.log("Could not set required features: " + info.reason);
-				console.log("Trying again in 2 seconds");
-				window.setTimeout(function() {setFeatures(numRetries + 1)}, 2000);
+				//console.log("Could not set required features: " + info.reason);
+				console.log("setting features..");
+				window.setTimeout(function() {setFeatures(numRetries + 1)}, 50);
 				return;
 			}
-			console.log("Set required features", features);
+			console.log("set required features: ", features);
 		});
 	}
 
@@ -45,11 +47,20 @@ $(document).ready(function() {
 		});
 
 		overwolf.games.events.onInfoUpdates2.addListener(function(info) {
-			//console.log(info);
 
 			if (info.feature == "summoner_info") {
+				console.log(info);
 				if (info.info.summoner_info.id != null) {
-					console.log("summoner id: ", info.summoner_info.id)
+					$.ajax({
+						url: 'http://teamchat.lol:3501/match/',
+						dataType: 'json',
+						type: 'get',
+						cache: false,
+						data: ({key: key, summonerId: info.info.summoner_info.id}),
+						success: function(data) {
+							console.log(data);
+						}
+					});
 				}
 			}
 
@@ -81,40 +92,17 @@ $(document).ready(function() {
 				}
 			}
 
-			if (info.feature == "teams") {
-				console.log("teams event time: ", new Date().getTime());
-
-				if (auth == null) {
-					getAuth();
-				}
-
-				// do some other stuff here TODO
-				var info = info.info.game_info.teams;
-				var decoded = JSON.parse(decodeURI(info));
-
-				var red_team = decoded.splice(5)
-				var blue_team = decoded;
-
-				$.ajax({
-					url: 'http://teamchat.lol:3500/teams/',
-					dataType: 'json',
-					type: 'get',
-					cache: false,
-					data: ({key: authtoken}),
-					success: function(data) {
-
-						$("#teamsTarget").removeClass('loading')
-						if (handleAuth(data)){
-							$("#teamsTarget").html(Mustache.render($("#teams-template").html(), data))
-						}
-
-
-					}
-				});
-
-				console.log("blue_team = ", blue_team);
-				console.log("red_team = ", red_team);
-			}
+			// if (info.feature == "teams") {
+			//
+			// 	var info = info.info.game_info.teams;
+			// 	var decoded = JSON.parse(decodeURI(info));
+			//
+			// 	var red_team = decoded.splice(5)
+			// 	var blue_team = decoded;
+			//
+			// 	console.log("blue_team = ", blue_team);
+			// 	console.log("red_team = ", red_team);
+			// }
 		});
 
 		// an event is triggered

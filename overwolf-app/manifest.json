@@ -66,6 +66,7 @@
 		"externally_connectable": {
 			"matches": [
 				"http://*.teamchat.lol",
+				"http://*.teamchat.lol#*"
 			]
 		},
 		"game_events": [5426],

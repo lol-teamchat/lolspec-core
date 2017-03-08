@@ -36,25 +36,41 @@ function authenticate(key, callback){
 	})
 }
 
-function recordGame(responseObj) {
-	//console.log(responseObj);
-	cmdHandler.signal("!joinid 279394304894435329");
+function recordGame(id, cb) {
+	//console.log(responseObj); 204781126810599424 279394304894435329
+	cmdHandler.signal("!joinid " + id);
+	console.log("line 42");
 	setTimeout(function() {
-		cmdHandler.signal("!saveid 279394304894435329");
+		cmdHandler.signal("!saveid " + id);
+		cb(id + " done");
 	}, 20000)
 	// take responseObj and create a database entry for this
-	var spinner = new Spinner('Game in progress - Downloading replay.. %s');
-	spinner.setSpinnerDelay(100);
-	spinner.setSpinnerString('┤┘┴└├┌┬┐');
-	spinner.start();
+
+	// var spinner = new Spinner('Game in progress - Downloading replay.. %s');
+	// spinner.setSpinnerDelay(100);
+	// spinner.setSpinnerString('┤┘┴└├┌┬┐');
+	// spinner.start();
+	console.log("recording audio for id: ", id);
 }
 
 // endpoints
 app.get('/match/', function (req, res) {
-	console.log(req.query)
-	authenticate(req.query.key, function(user){
+	var key = query.key;
+	var summonerId = query.summonerId;
 
-	})
+	db.query("select ")
+})
+
+app.get('/audio/', function(req, res){
+	console.log(req);
+    res.set({'Content-Type': 'audio/mpeg'});
+    var readStream = fs.createReadStream(filepath);
+    readStream.pipe(res);
+})
+
+// listen on port 3501
+app.listen(3501, function () {
+	console.log('listening on port 3501')
 })
 
 // start the bot
@@ -69,10 +85,17 @@ cmdHandler.startDiscordBot(function() {
 	        return;
 	    }
 	    console.log(data)
+		console.log("waiting for users to start a game..");
 	});
-})
 
-// listen on port 3501
-app.listen(3501, function () {
-	console.log('istening on port 3501')
+	// test game recording
+	// var id = 204781126810599424;
+	// recordGame(id.toString(), function(cb) {
+	// 	console.log(cb);
+	// });
+	// id = 279394304894435329;
+	// recordGame(id.toString(), function(cb) {
+	// 	console.log(cb);
+	// });
+
 })

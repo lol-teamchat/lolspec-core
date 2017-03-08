@@ -14,12 +14,12 @@ exports.startDiscordBot = function(done) {
 	})
 
 	child.stdout.on('data', (data) => {
-	//console.log(`stdout: ${data}`);
+		//console.log(`stdout: ${data}`);
 	  //when stdout gets an "ended current process" message, execute first in queue
 	  if(`${data}`.match("Ended current process")) {
 		if (once) {
-			done();
 			once = false;
+			done();
 		}
 
 	    if (!proctab[0]){
@@ -29,7 +29,10 @@ exports.startDiscordBot = function(done) {
 	    if(proctab[0] == "start"){
 		  console.log("discord bot initiated");
 	      proctab.shift();
-		  return;
+		  //console.log(proctab);
+		  if (!proctab[0]) {
+			  return;
+		  }
 	    }
 	    child.stdin.write(proctab[0],"utf-8",proctab.shift());
 	  }
