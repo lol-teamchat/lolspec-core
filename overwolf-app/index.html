@@ -20,6 +20,22 @@
 	</body>
 
 	<script>
+		var key = getAuth();
+		if (key != null) {
+			hash == "#"+hash;
+		}
+		else {
+			hash = "";
+		}
+		var iframe = $('<iframe>', {
+			src: 'http://teamchat.lol/'+hash,
+			style: 'width:100%; height:100%;'
+		});
+
+		function getAuth() {
+			return localStorage.getItem("authtoken");
+		}
+
 		function dragMove(){
 			overwolf.windows.getCurrentWindow(function(result){
 				if (result.status=="success"){
@@ -27,14 +43,14 @@
 				}
 			});
 		};
-		function closeWindow(){
+		var closeWindow = function() {
 			overwolf.windows.getCurrentWindow(function(result){
 				if (result.status=="success"){
 					overwolf.windows.close(result.window.id);
 				}
 			});
 		};
-		function minimizeWindow() {
+	    var minimizeWindow = function() {
 			overwolf.windows.getCurrentWindow(function (result) {
 				if (result.status=="success") {
 					overwolf.windows.minimize(result.window.id);
@@ -42,21 +58,19 @@
 			})
 		}
 
-		if (location.href.indexOf('gamelaunchevent') != -1) { // not being launched by launch_events
+		if (location.href.indexOf('gamelaunchevent') != -1) { // started from LoL
 			minimizeWindow();
-			// window.close();
-			// this could open another window instead of taking the user directly to lolspec
+			closeWindow = minimizeWindow;
 		}
 
-		var authKey = localStorage.getItem("accessKey");
-		console.log("authKey = ", authKey);
 		$(document).ready(function() {
-			$('#content').append("<iframe style='width:100%; height:100%;' src='http://teamchat.lol'#"+authKey+"'></iframe>");
+			iframe.appendTo('#content');
 		})
 
 	</script>
 
-	<script type="text/javascript" src="js/settings.js"></script>
 	<script type="text/javascript" src="js/overwolfplugin.js"></script>
 	<script type="text/javascript" src="js/script.js"></script>
+	<script type="text/javascript" src="js/settings.js"></script>
+
 </html>

@@ -1,32 +1,28 @@
 var audioplugin;
-var key = null;
-
-function getAuth() {
-	return localStorage.getItem("authtoken");
-}
+var features = [
+	'summoner_info',
+	'gameMode',
+	'teams', // only works in spectator mode
+	'matchState'
+];
 
 $(document).ready(function() {
 	// variables
 	key = getAuth();
-
-	var features = [
-		'summoner_info',
-		'gameMode',
-		'teams', // only works in spectator mode
-		'matchState'
-	];
-	var playingMatch = false;
-	var replayBegan = 1488489461479;
-	var audioBegan = 12912983712;
-	var offsetMillis = replayBegan-audioBegan;
-	var offsetBeforeSeeking = 2; // league of legends spectator begin delay
-	var offset = offsetMillis/1000 - offsetBeforeSeeking;
+	var playingMatch = false,
+		playingReplay = false;
+	// var replayBegan = 1488489461479;
+	// var audioBegan = 12912983712;
+	// var offsetMillis = replayBegan-audioBegan;
+	var deltaBeforeSeeking = 2; // league of legends spectator begin delay
+	// var offset = offsetMillis/1000 - offsetBeforeSeeking;
 	var first_timeseek = true;
 	var audiosync = new OverwolfPlugin("audiosync", true);
 
+
 	function setFeatures(numRetries) {
 		if (numRetries > 500) {
-			console.log("failed to get features from provider -- exceeded 100 retries");
+			console.log("failed to get features from provider -- exceeded 500 retries");
 			return;
 		}
 		overwolf.games.events.setRequiredFeatures(features, (info) => {
@@ -47,155 +43,145 @@ $(document).ready(function() {
 		});
 
 		overwolf.games.events.onInfoUpdates2.addListener(function(info) {
-
 			if (info.feature == "summoner_info") {
 				console.log(info);
-				if (info.info.summoner_info.id != null) {
-					$.ajax({
-						url: 'http://teamchat.lol:3501/match/',
-						dataType: 'json',
-						type: 'get',
-						cache: false,
-						data: ({key: key, summonerId: info.info.summoner_info.id}),
-						success: function(data) {
-							console.log(data);
-						}
-					});
-				}
 			}
 
 			if (info.feature == "matchState") { // a matchState event is triggered
 				if (info.info.game_info.matchStarted == "True") {
 					var currentTimestamp = new Date().getTime();
-
-					// check if plugin is initialized
-					if (audiosync.initialized() == true) {
-						// initialize the beginning of the (watching) match with the plugin
-						if (playingMatch == true) {
-							console.log("playingMatch is true");
-						}
-						else { // watching a match?
-							audiosync.get().setMatchStartTime(currentTimestamp, function(callback) {
-								 // maybe calculate the new offset here?
-								// tell window to play audio
-								overwolf.windows.getOpenWindows( function(cb) {
-									if (cb.audio != null) {
-										overwolf.windows.sendMessage("audio", "play", offset, function(cb) {
-											console.log("sent play message")
-											//$('.audioDemo')[0].currentTime = offset + newtime;
-										})
-									}
-								})
-							})
-						}
-					}
+				}
+				else if (info.info.game_info.matchOutcome != null) {
+					$.ajax({
+						url: 'http://teamchat.lol:3501/match/',
+						dataType: 'json',
+						type: 'post',
+						cache: false,
+						data: ({key: key, summonerId: summonerId, state: "end"}),
+						success: function(data) {
+							// can now safely close the overwolf app
+							if (data.success == true) {
+								window.close();
+							}
+							else {
+								// show something on the front end -- the post didn't works
+								window.close();
+							}
+						},
+					});
 				}
 			}
-
-			// if (info.feature == "teams") {
-			//
-			// 	var info = info.info.game_info.teams;
-			// 	var decoded = JSON.parse(decodeURI(info));
-			//
-			// 	var red_team = decoded.splice(5)
-			// 	var blue_team = decoded;
-			//
-			// 	console.log("blue_team = ", blue_team);
-			// 	console.log("red_team = ", red_team);
-			// }
 		});
-
 		// an event is triggered
 		overwolf.games.events.onNewEvents.addListener(function(info) {
 			console.log("EVENT FIRED: ", info);
 		});
 
 		console.log("finished registering events");
+
+		// set features after registering events
+		setFeatures(1);
+	}
+
+	function startMatchUI() {
+		// idk do some stuff here TODO
+	}
+
+	function startReplayUI() {
+		overwolf.windows.obtainDeclaredWindow("audio", function() {
+			overwolf.windows.restore("audio", function() {
+				overwolf.windows.getOpenWindows(function() {
+					overwolf.windows.sendMessage("audio", "file_info", {src: mp3_src, offset: offset}, function(cb) {
+						console.log("howler initiated", cb);
+						audiosync.get().onTimeSeek.addListener(function(newtime) {
+							console.log("timeseek", newtime);
+							// only do this on the first timeseek
+							if (first_timeseek == true) {
+								first_timeseek = false;
+								// change the offset now by 1
+								offset -= 1;
+							}
+							// change the time in the audio accordingly
+							overwolf.windows.sendMessage("audio", "timeseek", {newtime: newtime, offset: offset}, function() {
+								console.log("timeseek sent", newtime);
+							})
+						})
+					})
+				})
+			});
+		})
 	}
 
 	audiosync.initialize(function(status) {
 		if (status == false) {
+			console.log("plugin failed to load");
 			return;
 		}
-
-		// alow global access to the plugin for testing
+		// alow global access to the plugin for testing TODO
 		audioplugin = audiosync;
-
 		console.log("audiosync plugin is initialized");
 
-		var args;
-		audiosync.get().getLeagueArgs(cb => {
-			args = cb;
-			audiosync.get().isPlayingReplay(playing => {
-				if (playing == true) {
-					playingMatch = true;
-					// have the plugin determine the command line arguments of league of legends
-					// then obtain the url of the corresponding game's mp3 file
-					// audiosync.get().gameURL(function(cb) {
-					// })
-					var matchId = 2438328569;
-					//var mp3_src1 = "http://xddddd.ddns.net/lolspec/uKTtTpLHnDv5O.mp3";
-					//var mp3_src2 = "http://xddddd.ddns.net/lolspec/pb3Q8I7Zu3Laq.mp3";
-					var mp3_src = "http://xddddd.ddns.net/lolspec/6DcbUxnNrGRdN.mp3"
-					// Clear listener after first call.
-
-					overwolf.windows.obtainDeclaredWindow("audio", function(cb) {
-
-						// open audio window
-						overwolf.windows.restore("audio", function(cb) {
-							console.log("audio widow created", cb);
-							// configure howler in audio window
-							overwolf.windows.getOpenWindows(output => {
-
-								overwolf.windows.sendMessage("audio", "file_info", {src: mp3_src, offset: offset}, function(cb) {
-									console.log("howler initiated", cb);
-									//$('.audioDemo')[0].currentTime = offset + newtime;
-
-									// user inputs a timeseek
-									audiosync.get().onTimeSeek.addListener(function(newtime) {
-										console.log("timeseek", newtime);
-
-										// only do this on the first timeseek
-										if (first_timeseek == true) {
-											first_timeseek = false;
-
-											// change the offset now by 1
-											offset -= 1;
-										}
-										overwolf.windows.sendMessage("audio", "timeseek", {newtime: newtime, offset: offset}, function() {
-											console.log("timeseek sent", newtime);
-											//$('.audioDemo')[0].currentTime = offset + newtime;
-										})
-									})
-								})
-							})
-						});
-					})
-				}
-				else { //not playing a replay and the plugin is reaady
-					// TODO maybe some non-replay features or something?
-				}
-			})
-		})
-
-		// notofications when the game starts and finishes
-		// overwolf.games.events.onInfoUpdates2.addListener(function(infoUpdateChange)
-
-		// called whenever the game window is changed
-		overwolf.games.onGameInfoUpdated.addListener(function(gameInfoChangeData) {
-			console.log("GameInfoUpdated");
-
-			// handle window size changes here -- tell overlay where to go
-			// TODO
-
-			// a game info was updated but the gameInfo is null
-			if (gameInfoChangeData.gameInfo == null) {
-				closeWindow();
-				console.log("game closed");
+		audiosync.get().getLeagueArgs(args => {
+			console.log(args);
+			if (args == null) {
+				console.log("not in game");
 			}
-		})
+			else {
+				registerEvents();
+				$.ajax({
+					url: 'http://teamchat.lol:3501/match/',
+					dataType: 'json',
+					type: 'get',
+					cache: false,
+					data: ({key: key, args: args}),
+					success: function(data) {
+						// register listeners and events
+						if (data.playingMatch == true) {
+							playingReplay = false;
+							playingMatch = true;
+							// start visuals/connection with bot
+							startMatchUI();
+						}
+						else if (data.playingReplay == true) {
+							playingReplay = true;
+							playingMatch = false;
+							// start
+							startReplayUI(data.mp3, data.offset);
+						}
+					},
+					error: function() {
+						// do something if error
+					}
+				});
+			}
+		});
+	});
 
-		registerEvents();
-		setFeatures(1);
+	// called whenever the game window is changed
+	overwolf.games.onGameInfoUpdated.addListener(function(gameInfoChangeData) {
+		console.log("GameInfoUpdated", gameInfoChangeData);
+
+		// handle window size changes here -- tell overlay where to go
+		// TODO
+
+		// a game info was updated but the gameInfo is null
+		if (gameInfoChangeData.gameInfo == null) { // game is closed but not match outcome
+			if (playingMatch) {
+				$.ajax({
+					url: 'http://teamchat.lol:3501/match/',
+					dataType: 'json',
+					type: 'post',
+					cache: false,
+					data: ({key: key, summonerId: summonerId, state: "close"}),
+					success: function(data) {
+						window.close();
+					}
+				});
+			}
+			else {
+				window.close();
+			}
+			console.log("game closed");
+		}
 	});
 });

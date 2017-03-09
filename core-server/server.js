@@ -55,10 +55,30 @@ function recordGame(id, cb) {
 
 // endpoints
 app.get('/match/', function (req, res) {
-	var key = query.key;
-	var summonerId = query.summonerId;
+	console.log(req.query.args);
+	var commandLine = req.query.args;
+	var key = req.query.key;
 
-	db.query("select ")
+	if (commandLine.includes(".rofl")) {
+        // watching a completed replay -- check to see if they "own" the replay
+		
+    }
+    else if (commandLine.includes("spectator")) {
+        // spectator
+        if (commandLine.includes("lol.riotgames.com")) {
+            // spectating on the live server grid -> return false
+            return -1;
+        }
+    }
+    else {
+        // no .rofl or spectator arguments
+        return -1;
+    }
+
+
+	// db.query("select ")
+	// res.send()
+	//
 })
 
 app.get('/audio/', function(req, res){
