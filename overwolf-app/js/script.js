@@ -51,13 +51,13 @@ $(document).ready(function() {
 				if (info.info.game_info.matchStarted == "True") {
 					var currentTimestamp = new Date().getTime();
 				}
-				else if (info.info.game_info.matchOutcome != null) {
+				else if (info.info.game_info.matchOutcome != null) { // match over
 					$.ajax({
 						url: 'http://teamchat.lol:3501/match/',
 						dataType: 'json',
 						type: 'post',
 						cache: false,
-						data: ({key: key, summonerId: summonerId, state: "end"}),
+						data: ({key: key, state: "end"}),
 						success: function(data) {
 							// can now safely close the overwolf app
 							if (data.success == true) {
@@ -112,15 +112,7 @@ $(document).ready(function() {
 		})
 	}
 
-	audiosync.initialize(function(status) {
-		if (status == false) {
-			console.log("plugin failed to load");
-			return;
-		}
-		// alow global access to the plugin for testing TODO
-		audioplugin = audiosync;
-		console.log("audiosync plugin is initialized");
-
+	function getServer() {
 		audiosync.get().getLeagueArgs(args => {
 			console.log(args);
 			if (args == null) {
@@ -155,6 +147,19 @@ $(document).ready(function() {
 				});
 			}
 		});
+	}
+
+	audiosync.initialize(function(status) {
+		if (status == false) {
+			console.log("plugin failed to load");
+			return;
+		}
+		// alow global access to the plugin for testing TODO
+		audioplugin = audiosync;
+		console.log("audiosync plugin is initialized");
+
+		// run game start logic;
+		getServer();
 	});
 
 	// called whenever the game window is changed
@@ -164,6 +169,10 @@ $(document).ready(function() {
 		// handle window size changes here -- tell overlay where to go
 		// TODO
 
+		if (gameInfoChangeData.gameChanged == true) {
+			getServer();
+		}
+
 		// a game info was updated but the gameInfo is null
 		if (gameInfoChangeData.gameInfo == null) { // game is closed but not match outcome
 			if (playingMatch) {
@@ -172,7 +181,7 @@ $(document).ready(function() {
 					dataType: 'json',
 					type: 'post',
 					cache: false,
-					data: ({key: key, summonerId: summonerId, state: "close"}),
+					data: ({key: key, state: "terminate"}),
 					success: function(data) {
 						window.close();
 					}

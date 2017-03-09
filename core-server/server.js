@@ -59,21 +59,36 @@ app.get('/match/', function (req, res) {
 	var commandLine = req.query.args;
 	var key = req.query.key;
 
-	if (commandLine.includes(".rofl")) {
-        // watching a completed replay -- check to see if they "own" the replay
-		
-    }
-    else if (commandLine.includes("spectator")) {
-        // spectator
-        if (commandLine.includes("lol.riotgames.com")) {
-            // spectating on the live server grid -> return false
-            return -1;
-        }
-    }
-    else {
-        // no .rofl or spectator arguments
-        return -1;
-    }
+	// authenticate key TODO
+
+	if (req.query.state == "terminate") {
+		console.log("game ended early");
+	}
+
+	if (commandLine != null) {
+		if (commandLine.includes(".rofl")) {
+	        // watching a completed replay -- check to see if they "own" the replay
+			console.log("has .rofl");
+			// var valid = false;
+			// var matchid = 0;
+			// db.query('SELECT team_id FROM sessions WHERE session_hash = ?', [key])
+			// .on('result', function(data) {
+			//
+			// })
+			// .on('end')
+	    }
+	    else if (commandLine.includes("spectator")) {
+	        // spectator
+	        if (commandLine.includes("lol.riotgames.com")) {
+	            // spectating on the live server grid -> return false
+	            return -1;
+	        }
+	    }
+	    else {
+	        // no .rofl or spectator arguments
+	        return -1;
+	    }
+	}
 
 
 	// db.query("select ")
