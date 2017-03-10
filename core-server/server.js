@@ -9,13 +9,18 @@ const bodyParser = require('body-parser');
 const cmdHandler = require('./cmdHandler.js');
 const express = require('express');
 const cors = require('cors');
+const unirest = require('unirest');
 var config = JSON.parse(fs.readFileSync('config/config.json')); // read config
 const db = mysql.createConnection(config.mysql);
+
 var api_key = config.api_key;
-var teams = config.teams;
+//var teams = config.teams;
 var app = express();
 
+var activeGames = [];
+
 const SERVER_URL = "http://teamchat.lol";
+const MAX_RETRIES = 10;
 
 app.use(bodyParser.json()); // support json encoded bodies
 app.use(bodyParser.urlencoded({ extended: true })); // support encoded bodies
@@ -38,10 +43,19 @@ function authenticate(key, callback){
 	})
 }
 
+function getSpectatorGameInfo(summonerId, cb) {
+	unirest.get("https://na.api.pvp.net/observer-mode/rest/consumer/getSpectatorGameInfo/NA1/"+summonerId+"?api_key="+api_key)
+	.headers({'Accept': 'application/json', 'Content-Type': 'application/json'})
+	.end(function (response) {
+		cb(response.body);
+	});
+}
+
 function recordGame(data) {
-	
-	cmdHandler.signal("!joinid " + id);
-	console.log("line 42");
+
+	// discord_id and summonerId
+	cmdHandler.signal("!joinid " + data.summonerId)
+
 	setTimeout(function() {
 		cmdHandler.signal("!saveid " + id);
 		cb(id + " done");
@@ -50,6 +64,103 @@ function recordGame(data) {
 
 
 	console.log("recording audio for id: ", id);
+}
+
+function checkGame(summonerId, team_id, success) {
+	var gameInfo;
+
+	var doFind = function(retries) {
+		if (retries > MAX_RETRIES) {
+			console.log("exceeded max retries, not recording ", summonerId);
+			return;
+		}
+		getSpectatorGameInfo(summonerId, function(data) {
+			console.log(data);
+			if (data.status != null && data.status.status_code == 403) {
+				console.log("api key bad");
+				return;
+				// send ixenbay an email TODO
+			}
+			else if (data.status != null && data.status.status_code == 404) {
+				setTimeout(function() {
+					doFind(retries+1);
+				}, 1500)
+			}
+			else { // obtained match spectate data -> check all teammates
+				var players = [];
+				gameInfo = data;
+				console.log(gameInfo);
+				var teamNumber = 0;
+				var participants = data.participants;
+
+				// get the team number
+				for (var i = 0; i < participants.length; i++) {
+					if (participants[i].summonerId == summonerId) {
+						teamNumber = participants[i].teamId;
+						break;
+					}
+				}
+
+				db.query("select summoner_id from players where team_id = ?", [team_id])
+				.on('result', function(data) {
+					players.push(data);
+				})
+				.on('end', function() {
+
+					for (var i = 0; i < players.length; i++) { // each player on a Teamchat team
+						var hasTeammate = false;
+						for (var j = 0; j < participants.length; j++) { // each participant in a game
+							if (participants[j].summonerId == players[i].summoner_id) {
+								hasTeammate = true;
+								if (participants[j].teamId != teamNumber) {
+									success(false);
+									return;
+								}
+								else { // teamchat teammate is on the same team
+									break;
+								}
+							}
+						}
+						if (hasTeammate == false) {
+							success(false);
+							return;
+						}
+					}
+					success(true, gameInfo.gameId); // callback true with gameId
+				})
+			}
+		})
+	}
+
+	doFind(1);
+
+}
+
+// adds the game to an array and gets the start time later;
+function addToActiveGames(matchId, summonerId, team_id) {
+
+	for (var i = 0; i < activeGames.length; i++) {
+		if (activeGames[i].matchId == matchId) {
+			return; // already has this match
+		}
+	}
+
+	db.query("insert into replays (match_id, team_id, start_time) values (?,?,?)", [matchId, team_id, 0])
+
+ 	activeGames.push({matchId: matchId, startTime: 0}); // push to array
+
+	setTimeout(function() {
+		getSpectatorGameInfo(summonerId, function(data) {
+			var startTime = data.gameStartTime;
+			for (var i = 0; i < activeGames.length; i++) {
+				if (activeGames[i].matchId == matchId) {
+					db.query("UPDATE replays SET start_time = ? WHERE match_id = ?", [startTime, matchId])
+					return;
+				}
+			}
+		})
+	}, 70000); // wait 70 seconds before obtaining the gameStartTime to allow it to appear
+
 }
 
 // endpoints
@@ -111,19 +222,35 @@ app.get('/match/', function (req, res) {
 			const charsBetweenEquals = 3; // 3 characters between the == and first digit
 			var summonerIdToEnd = commandLine.substring(index+3);
 			var summonerId = summonerIdToEnd.substring(0, summonerIdToEnd.indexOf("\""));
-
+			console.log(summonerId);
 			var result = false;
-			db.query("select p.discord_id from players p left outer join sessions s on s.team_id = p.team_id where s.session_hash = ? and p.summoner_id = ?", [key, summonerId])
-			.on('result', function(data){
-				result = data.discord_id;
+			db.query("select p.discord_id, s.team_id from players p left outer join sessions s on s.team_id = p.team_id where s.session_hash = ? and p.summoner_id = ?", [key, summonerId])
+			.on('result', function(data) {
+				result = {};
+				result.discord_id = data.discord_id;
+				result.team_id = data.team_id;
 			})
 			.on('end', function() {
 				if (result != false) {
 					// tell discord bot to record
-					recordGame(result);
+					result.summonerId = summonerId;
+					console.log("line 205 ", result);
+					checkGame(summonerId, result.team_id, function(success, matchId = null) {
+						if (success == true) { // all teammates on same team
+							res.send({playingMatch: true});
+							console.log("all players on team and we good to go");
+							//recordGame(result.summonerId);
+							addToActiveGames(matchId, summonerId, result.team_id);
+						}
+						else { // not all teammates in same game
+							returnData = {success: false, message: "not all teammates on your team"};
+							res.send(returnData)
+							console.log("not all playing are in the match or on the same team");
+						}
+					});
 				}
-				else {
-					// failed to validate
+				else { // invalid hash
+					console.log("invalid hash");
 					returnData = {success: false};
 					res.send(returnData);
 				}
@@ -158,15 +285,5 @@ cmdHandler.startDiscordBot(function() {
 	    console.log(data)
 		console.log("waiting for users to start a game..");
 	});
-
-	// test game recording
-	// var id = 204781126810599424;
-	// recordGame(id.toString(), function(cb) {
-	// 	console.log(cb);
-	// });
-	// id = 279394304894435329;
-	// recordGame(id.toString(), function(cb) {
-	// 	console.log(cb);
-	// });
 
 })
