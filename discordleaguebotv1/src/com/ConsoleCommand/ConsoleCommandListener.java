@@ -45,7 +45,7 @@ public class ConsoleCommandListener implements Runnable {
         	if(scanner.hasNext()){
         		if((line = scanner.nextLine()) != null) {
         			if (line.contains("saveid") || line.contains("joinid") || line.contains("leave")){
-        				CommandHandler.handleCommand(CommandHandler.parser.parse(line.toLowerCase()));
+        				CommandHandler.handleCommand(CommandHandler.parser.parse(line));
         			}
         		}
         	}
