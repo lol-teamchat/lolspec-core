@@ -35,13 +35,15 @@
 		$( document ).ready(function() {
 		  // Handler for .ready() called.
 	  		var offset = 0;
+			var timeline;
 	  		console.log("running script audio.html");
 
 	  		overwolf.windows.onMessageReceived.addListener(function(cb) {
 	  			console.log("recieived a message", cb);
 
-	  			if (cb.id == "file_info") {
+	  			if (cb.id == "info") {
 	  				offset = cb.content.offset;
+					timeline = cb.content.timeline; // do something with this TODO
 	  				sound = new Howl({
 	  					src: [cb.content.src],
 	  					html5: true
@@ -49,6 +51,7 @@
 	  				console.log("src=",cb.content.src);
 	  				sound.once('load', function(){
 	  				  console.log("done loading")
+					  sound.seek(offset);
 	  				});
 	  			}
 
@@ -61,11 +64,17 @@
 
 		  				if (sound.state() == "loaded") {
 		  					sound.seek((cb.content + offset));
+							if (sound.playing() == false) {
+								sound.play();
+							}
 		  				}
 						else {
 							sound.once('load', function() {
 								sound.seek((cb.content + offset));
 							})
+							if (sound.playing() == false) {
+								sound.play();
+							}
 						}
 		  			}
 
@@ -79,7 +88,7 @@
 		  				if (sound.state() != "loaded") {
 		  					console.log("unloaded")
 		  					sound.once('load', function(){
-								sound.seek(cb.content);
+								sound.seek(offset);
 		  						sound.play();
 		  					});
 		  				}
@@ -94,6 +103,9 @@
 					console.log("sound is null");
 				}
 	  		})
+
+			overwolf.windows.sendMessage("index", "ready", {}, function(){});
+
 		});
 	</script>
 

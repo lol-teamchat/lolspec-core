@@ -26,9 +26,11 @@ namespace audiosync
             dllPath = $"{Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)}\\{dll}";
             if (LeagueInjector.Inject(dllPath) == false) {
                 Logger.setError("failed to inject " + dll);
+                //MessageBox.Show("failed to inject", null, MessageBoxButtons.OK);
                 watchingReplay = false;
                 return;
             }
+            //MessageBox.Show("injected", null, MessageBoxButtons.OK);
             watchingReplay = true;       
             // listens for udp data
             listener = new Listener(listen_port);
@@ -47,7 +49,7 @@ namespace audiosync
             }
         }
 
-        // tells the plugin the current time in the game and resynchronizes
+        // tells the plugin the current time in the game to help with synchronization
         public void setMatchStartTime(double currentTimeStamp, Action<object> callback) {
             if (sync == null) {
                 callback("not watching a replay");

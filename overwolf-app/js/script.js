@@ -11,6 +11,7 @@ $(document).ready(function() {
 	key = getAuth();
 	var playingMatch = false,
 		playingReplay = false;
+	var audioReady = false;
 	// var replayBegan = 1488489461479;
 	// var audioBegan = 12912983712;
 	// var offsetMillis = replayBegan-audioBegan;
@@ -43,6 +44,7 @@ $(document).ready(function() {
 		});
 
 		overwolf.games.events.onInfoUpdates2.addListener(function(info) {
+			console.log("INFO FIRED", info);
 			if (info.feature == "summoner_info") {
 				console.log(info);
 			}
@@ -74,7 +76,18 @@ $(document).ready(function() {
 		});
 		// an event is triggered
 		overwolf.games.events.onNewEvents.addListener(function(info) {
-			console.log("EVENT FIRED: ", info);
+			console.log("EVENT FIRED", info);
+			if (info.events["0"].name == "matchStart") {
+				// match is started
+				console.log("MATCH STARTED");
+				if (audioReady) {
+					overwolf.windows.sendMessage("audio", "play", {}, function() {}); // play sent
+				}
+				else {
+					console.log("audio isn't ready yet");
+					// DO SOMETHING IF AUDIO CANT PLAY -- play when ready?? TODO
+				}
+			}
 		});
 
 		console.log("finished registering events");
@@ -85,36 +98,46 @@ $(document).ready(function() {
 
 	function startMatchUI() {
 		// idk do some stuff here TODO
+		// maybe show that youre being recorded or show tools for talking to discord bot
+		// buttons that play forecast janna quotes or whatever else in the discord !!
 	}
 
-	function startReplayUI() {
+	function startReplayUI(src, offset, timeline) {
 		overwolf.windows.obtainDeclaredWindow("audio", function() {
 			overwolf.windows.restore("audio", function() {
 				overwolf.windows.getOpenWindows(function() {
-					overwolf.windows.sendMessage("audio", "file_info", {src: mp3_src, offset: offset}, function(cb) {
-						console.log("howler initiated", cb);
-						audiosync.get().onTimeSeek.addListener(function(newtime) {
-							console.log("timeseek", newtime);
-							// only do this on the first timeseek
-							if (first_timeseek == true) {
-								first_timeseek = false;
-								// change the offset now by 1
-								offset -= 1;
-							}
-							// change the time in the audio accordingly
-							overwolf.windows.sendMessage("audio", "timeseek", {newtime: newtime, offset: offset}, function() {
-								console.log("timeseek sent", newtime);
-							})
-						})
+					overwolf.windows.onMessageReceived.addListener(function(cb) {
+						if (cb.id == "ready") {
+							audioReady = true;
+							setAudioFile(src, offset, timeline);
+						}
 					})
 				})
 			});
 		})
 	}
 
+	function setAudioFile(src, offset, timeline) {
+		overwolf.windows.sendMessage("audio", "info", {src: src, offset: offset, timeline: timeline}, function(cb) {
+			console.log("howler initiated", cb);
+			audiosync.get().onTimeSeek.addListener(function(newtime) {
+				console.log("timeseek", newtime);
+				// only do this on the first timeseek
+				if (first_timeseek == true) {
+					first_timeseek = false;
+					// change the offset now by 1
+					offset -= 1;
+				}
+				// change the time in the audio accordingly
+				overwolf.windows.sendMessage("audio", "timeseek", {newtime: newtime, offset: offset}, function() {
+					console.log("timeseek sent", newtime);
+				})
+			})
+		})
+	}
+
 	function getServer() {
 		audiosync.get().getLeagueArgs(args => {
-			console.log(args);
 			if (args == null) {
 				console.log("not in game");
 			}
@@ -138,7 +161,11 @@ $(document).ready(function() {
 							playingReplay = true;
 							playingMatch = false;
 							// start
-							startReplayUI(data.mp3, data.offset);
+							startReplayUI(data.src, data.offset, data.timeline);
+						}
+						else {
+							// indicate that the hash failed for the current match TODO
+							console.log("failed to authenticate hash");
 						}
 					},
 					error: function() {
