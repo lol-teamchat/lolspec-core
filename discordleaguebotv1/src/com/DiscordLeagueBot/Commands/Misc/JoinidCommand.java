@@ -48,6 +48,10 @@ public class JoinidCommand implements Command {
  		if (vc == null){
  			return;
  		}
+ 		//if we are already in the guild
+ 		if (vc.getGuild().getAudioManager().isConnected()){
+ 			return;
+ 		}
 		DiscordLeagueBot.joinVoiceChannel(vc,true,args[1]);
 		
 		//say janna's intro to alert players she is recording
