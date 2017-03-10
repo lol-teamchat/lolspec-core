@@ -51,20 +51,20 @@ function getSpectatorGameInfo(summonerId, cb) {
 	});
 }
 
-function recordGame(data) {
-
-	// discord_id and summonerId
-	cmdHandler.signal("!joinid " + data.summonerId)
-
-	setTimeout(function() {
-		cmdHandler.signal("!saveid " + id);
-		cb(id + " done");
-	}, 20000)
-	// take responseObj and create a database entry for this
-
-
-	console.log("recording audio for id: ", id);
-}
+// function recordGame(data) {
+//
+// 	// discord_id and summonerId
+// 	cmdHandler.signal("!joinid " + data.summonerId)
+//
+// 	setTimeout(function() {
+// 		cmdHandler.signal("!saveid " + id);
+// 		cb(id + " done");
+// 	}, 20000)
+// 	// take responseObj and create a database entry for this
+//
+//
+// 	console.log("recording audio for id: ", id);
+// }
 
 function checkGame(summonerId, team_id, success) {
 	var gameInfo;
@@ -145,22 +145,54 @@ function addToActiveGames(matchId, summonerId, team_id) {
 		}
 	}
 
-	db.query("insert into replays (match_id, team_id, start_time) values (?,?,?)", [matchId, team_id, 0])
+	makeUniqueId(function(dirname) {
+		console.log("directory name: " + dirname);
+		db.query("insert into replays (match_id, team_id, start_time, directory) values (?,?,?,?)", [matchId, team_id, 0, dirname])
+		console.log("updated matchId, team_id, directory ", matchId, team_id, dirname);
+		// tell discord bot to join the server
+		cmdHandler.signal("!joinid "+summonerId+" "+dirname);
 
- 	activeGames.push({matchId: matchId, startTime: 0}); // push to array
 
-	setTimeout(function() {
-		getSpectatorGameInfo(summonerId, function(data) {
-			var startTime = data.gameStartTime;
-			for (var i = 0; i < activeGames.length; i++) {
-				if (activeGames[i].matchId == matchId) {
-					db.query("UPDATE replays SET start_time = ? WHERE match_id = ?", [startTime, matchId])
-					return;
+		// the matchid, the summoner who began the recording, 0 start time, folder where its being saved
+	 	activeGames.push({matchId: matchId, summonerId: summonerId, startTime: 0, directory: dirname}); // push to array
+
+		setTimeout(function() {
+			getSpectatorGameInfo(summonerId, function(data) {
+				var startTime = data.gameStartTime;
+				for (var i = 0; i < activeGames.length; i++) {
+					if (activeGames[i].matchId == matchId) {
+						db.query("UPDATE replays SET start_time = ? WHERE match_id = ?", [startTime, matchId])
+						console.log("updated match start time for match: ", matchId);
+						return;
+					}
 				}
-			}
-		})
-	}, 70000); // wait 70 seconds before obtaining the gameStartTime to allow it to appear
+			})
+		}, 70000); // wait 70 seconds before obtaining the gameStartTime to allow it to appear
+	});
+}
 
+// random string
+function makeUniqueId(returnValue) {
+    var text = "";
+    var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+    for( var i=0; i < 5; i++ ) {
+        text += possible.charAt(Math.floor(Math.random() * possible.length));
+	}
+
+	var count = 0;
+	db.query("select count(*) as cnt from replays where directory = ?", [text])
+	.on('result', function(data) {
+		count = data.cnt;
+	})
+	.on('end', function() {
+		if (count > 0) {
+			makeUniqueId(returnValue);
+		}
+		else {
+			returnValue(text);
+		}
+	})
 }
 
 // endpoints
@@ -173,10 +205,6 @@ app.get('/match/', function (req, res) {
 
 	console.log(key);
 
-	if (req.query.state == "terminate") {
-		console.log("game ended early");
-	}
-
 	if (commandLine != null) {
 		if (commandLine.includes(".rofl")) {
 	        // watching a completed replay -- check to see if they "own" the replay
@@ -184,7 +212,7 @@ app.get('/match/', function (req, res) {
 			var extIndex = commandLine.indexOf(".rofl");
 			var matchId = commandLine.substring(extIndex-matchIdLength, extIndex);
 
-			db.query("select r.directory, r.id from replays r left outer join sessions s on s.team_id = r.team_id where s.session_hash = ? and r.match_id = ?", [key, matchId])
+			db.query("select r.directory, r.id, r.start_time from replays r left outer join sessions s on s.team_id = r.team_id where s.session_hash = ? and r.match_id = ?", [key, matchId])
 			.on('result', function(data) {
 				returnData = data;
 				returnData.playingReplay = true;
@@ -193,7 +221,11 @@ app.get('/match/', function (req, res) {
 			.on('end', function() {
 
 				// calculate the offset based on start of match and mp3 timeline TODO
-				returnData.offset = 2; // TODO
+
+				var replayBegan = returnData.start_time;
+				var audioBegan = 1489155868949;
+				var offset = (replayBegan-audioBegan)/1000;
+				returnData.offset = offset;
 				// form a .php link and send that TODO
 				returnData.src = SERVER_URL+"/core-server/recording/"+returnData.directory+"/audio.mp3";
 				returnData.timeline = SERVER_URL+"/core-server/recording/"+returnData.directory+"/timestamp.txt";
@@ -239,7 +271,8 @@ app.get('/match/', function (req, res) {
 						if (success == true) { // all teammates on same team
 							res.send({playingMatch: true});
 							console.log("all players on team and we good to go");
-							//recordGame(result.summonerId);
+
+							// this function will start the discord bot as well
 							addToActiveGames(matchId, summonerId, result.team_id);
 						}
 						else { // not all teammates in same game
@@ -259,12 +292,79 @@ app.get('/match/', function (req, res) {
 	}
 })
 
-app.get('/audio/', function(req, res){
-	console.log(req);
-    res.set({'Content-Type': 'audio/mpeg'});
-    var readStream = fs.createReadStream(filepath);
-    readStream.pipe(res);
+app.get('/endgame/', function (req, res) {
+	console.log("endGame called");
+	var key = req.query.key;
+	var returnData = {success: false};
+
+	console.log(req.query);
+
+	if (req.query.state == "terminate") { // whole team left the game early
+		// TODO check if other teammates are still in game before deleting the record
+
+		console.log("game ended early");
+		// authenticate
+		var matchId = null;
+		var teamId = null;
+		db.query("select r.match_id, s.team_id from replays r left outer join sessions s on s.team_id = r.team_id where s.session_hash = ?", [key])
+		.on('result', function(data) {
+			matchId = data.match_id;
+			teamId = data.team_id;
+		})
+		.on('end', function() {
+
+			if (matchId != null) {
+				// end the game and STOP the recording
+				for (var i = 0; i < activeGames.length; i++) {
+					if (activeGames[i].matchId == matchId) {
+						db.query("DELETE FROM replays WHERE replays.match_id = ? AND replays.team_id = ?", [matchId, team_id])
+						console.log("deleted match: ", matchId, team_id);
+
+						// change to leaveid
+						cmdHandler.signal("!saveid "+activeGames[i].summonerId+" "+activeGames[i].directory);
+						res.send({success: true});
+						activeGames.splice(i, 1); // remove from the active games
+						return;
+					}
+				}
+			}
+		})
+
+	}
+
+	if (req.query.state == "end") { // game finished with a w/l
+		var matchId = null;
+		var teamId = null;
+		db.query("select r.match_id, s.team_id from replays r left outer join sessions s on s.team_id = r.team_id where s.session_hash = ?", [key])
+		.on('result', function(data) {
+			matchId = data.match_id;
+			teamId = data.team_id;
+		})
+		.on('end', function() {
+			if (matchId != null) {
+				// end the game and SAVE the recording
+				for (var i = 0; i < activeGames.length; i++) {
+					if (activeGames[i].matchId == matchId) {
+						// stop the discord bot
+						cmdHandler.signal("!saveid "+activeGames[i].summonerId);
+
+						res.send({success: true});
+
+						activeGames.splice(i, 1); // remove from the active games
+						return;
+					}
+				}
+			}
+		})
+	}
 })
+
+// app.get('/audio/', function(req, res){
+// 	console.log(req);
+//     res.set({'Content-Type': 'audio/mpeg'});
+//     var readStream = fs.createReadStream(filepath);
+//     readStream.pipe(res);
+// })
 
 // listen on port 3501
 app.listen(3501, function () {

@@ -7,9 +7,7 @@
 	</head>
 
 	<body>
-		<div style="width: 300px; height: 200px; background-color: black;" id="content" onmousedown="dragMove();">
-
-		</div>
+		<!-- <div style="width: 300px; height: 200px; background-color: black;" id="content" onmousedown="dragMove();"></div> -->
 	</body>
 
 	<script>
@@ -58,23 +56,24 @@
 				else if (sound != null) { // null check before doing anything other than creating sound
 					if (cb.id == "timeseek") {
 
-						if (cb.offset != null) {
-							offset = cb.offset;
-						}
-
 		  				if (sound.state() == "loaded") {
-		  					sound.seek((cb.content + offset));
+
+							console.log("seeking to new time: ", cb.content.newtime+cb.content.offset);
+
+		  					sound.seek((cb.content.newtime+cb.content.offset));
 							if (sound.playing() == false) {
 								sound.play();
 							}
 		  				}
 						else {
 							sound.once('load', function() {
-								sound.seek((cb.content + offset));
-							})
-							if (sound.playing() == false) {
+								console.log("seeking to new time 2")
+								sound.seek((cb.content.newtime+cb.content.offset));
+								if (sound.playing() == false) {
+									sound.play();
+								}
 								sound.play();
-							}
+							})
 						}
 		  			}
 

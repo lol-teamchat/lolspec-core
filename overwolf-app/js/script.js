@@ -19,7 +19,7 @@ $(document).ready(function() {
 	// var offset = offsetMillis/1000 - offsetBeforeSeeking;
 	var first_timeseek = true;
 	var audiosync = new OverwolfPlugin("audiosync", true);
-
+	var playingAudio = false; // playing audio
 
 	function setFeatures(numRetries) {
 		if (numRetries > 500) {
@@ -54,23 +54,23 @@ $(document).ready(function() {
 					var currentTimestamp = new Date().getTime();
 				}
 				else if (info.info.game_info.matchOutcome != null) { // match over
-					$.ajax({
-						url: 'http://teamchat.lol:3501/match/',
-						dataType: 'json',
-						type: 'post',
-						cache: false,
-						data: ({key: key, state: "end"}),
-						success: function(data) {
-							// can now safely close the overwolf app
-							if (data.success == true) {
-								window.close();
+					// check is playing a match and match had outcome
+					if (playingMatch) {
+						$.ajax({
+							url: 'http://teamchat.lol:3501/endgame/',
+							dataType: 'json',
+							type: 'get',
+							cache: false,
+							data: ({key: key, state: "end"}),
+							success: function(data) {
+								window.close(); // wait until server response before exiting app
 							}
-							else {
-								// show something on the front end -- the post didn't works
-								window.close();
-							}
-						},
-					});
+						});
+					}
+					else {
+						// finished a game, can stop app now
+						window.close();
+					}
 				}
 			}
 		});
@@ -81,6 +81,7 @@ $(document).ready(function() {
 				// match is started
 				console.log("MATCH STARTED");
 				if (audioReady) {
+					playingAudio = true;
 					overwolf.windows.sendMessage("audio", "play", {}, function() {}); // play sent
 				}
 				else {
@@ -126,7 +127,7 @@ $(document).ready(function() {
 				if (first_timeseek == true) {
 					first_timeseek = false;
 					// change the offset now by 1
-					offset -= 1;
+					//offset -= 1;
 				}
 				// change the time in the audio accordingly
 				overwolf.windows.sendMessage("audio", "timeseek", {newtime: newtime, offset: offset}, function() {
@@ -160,12 +161,13 @@ $(document).ready(function() {
 						else if (data.playingReplay == true) {
 							playingReplay = true;
 							playingMatch = false;
+
 							// start
-							startReplayUI(data.src, data.offset, data.timeline);
+							startReplayUI(data.src, data.offset-deltaBeforeSeeking, data.timeline);
 						}
 						else {
 							// indicate that the hash failed for the current match TODO
-							console.log("failed to authenticate hash");
+							console.log("failed to authenticate on server");
 						}
 					},
 					error: function() {
@@ -202,22 +204,24 @@ $(document).ready(function() {
 
 		// a game info was updated but the gameInfo is null
 		if (gameInfoChangeData.gameInfo == null) { // game is closed but not match outcome
+			console.log("game closed");
 			if (playingMatch) {
+				console.log("playing a match -> game ended");
 				$.ajax({
-					url: 'http://teamchat.lol:3501/match/',
+					url: 'http://teamchat.lol:3501/endgame/',
 					dataType: 'json',
-					type: 'post',
+					type: 'get',
 					cache: false,
 					data: ({key: key, state: "terminate"}),
 					success: function(data) {
-						window.close();
+						// check if the game still exists in the server before purging TODO
+						window.close(); // wait until server response before exiting app
 					}
 				});
 			}
 			else {
 				window.close();
 			}
-			console.log("game closed");
 		}
 	});
 });
