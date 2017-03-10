@@ -12,6 +12,7 @@ public class LeaveCommand implements Command {
 
     @Override
     public void action(String[] args) {
+    	//fix this soon
     	 try{
          	DiscordLeagueBot.leaveVoiceChannel(DiscordLeagueBot.api.getGuildById(DiscordLeagueBot.serverSettings.get(args[0]).lastGuildId).getAudioManager().getConnectedChannel());   
          }
