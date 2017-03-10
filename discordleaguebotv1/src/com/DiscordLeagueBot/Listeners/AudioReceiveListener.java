@@ -24,7 +24,7 @@ public class AudioReceiveListener implements AudioReceiveHandler
 
     public int index = 0;
     public boolean overwriting = false;
-    public String rand = "-";
+    public String saveloc = "folderNotGiven";
 
     public AudioReceiveListener(double volume) {
         this.volume = volume;

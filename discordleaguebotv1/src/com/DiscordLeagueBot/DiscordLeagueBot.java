@@ -98,10 +98,16 @@ public class DiscordLeagueBot
         File dest;
         try {
 
-                if (new File("recording/" + guild.getId().toString() + "/").exists())
-                    dest = new File("recording/" + guild.getId().toString() + "/" + ah.rand + ".mp3");
-                else
-                    dest = new File("recording/" + guild.getId().toString() + "_" + ah.rand + ".mp3");
+            if (new File("recording/").exists()){
+            	if (!(new File ("recording/" + ah.saveloc + "/").exists())){
+            		File newdir = new File ("recording/" + ah.saveloc + "/");
+            		newdir.mkdir();
+            	}
+            	dest = new File("recording/" + ah.saveloc + "/" + "audio.mp3");
+            }
+            else 
+                dest = new File("recording/" + ah.saveloc + "/" + "audio.mp3");
+
 
             byte[] voiceData;
             ah.canReceive = false;
@@ -119,71 +125,19 @@ public class DiscordLeagueBot
         }
     }
     
-    // will use something similar in the future
-   /* public static void writeNames(GuildJoinEvent e){
-    	try{
-    		File dest = null;
-    		try {
-    			dest = new File ("names");                
-            }
-            catch (Exception ex) {
-                ex.printStackTrace();
-            }
-    		FileReader fr = new FileReader("names");
-            BufferedReader br = new BufferedReader(fr);
-            String currname;
-            List <String> namesInGuild;
-            List <String> NamesMatching;
-            int j = 0;
-    		
-            try(  PrintWriter outfile = new PrintWriter(new FileOutputStream (dest,true))  ){
-    		for (Member i : (Member []) e.getGuild().getMembers().toArray()){
-    			namesInGuild.add(i.getUser().getName());
-    			System.out.println("array of names in guild: " + namesInGuild.toString());
-    		}  		        	
-    		        	 while((currname = br.readLine()) != null){
-    		     		        if(!namesInGuild.contains(currname)){
-    		     		        	NamesMatching.add(currname);
-    		     		        }
-    			
-                    outfile.println(i.getUser().getId().toString() + '\n');
-                    outfile.close();
-           }
-                catch (Exception ex) {
-                    ex.printStackTrace();
-                }
-    		}
-            br.close();
-            fr.close();
-    	}
-    }
-    
-*/
 
-    public static void writeSettingsJson() {
+    public static void writeUserGuildsJson() {
         try {
+        	System.out.println("writing settings: " + DiscordLeagueBot.serverSettings );
             Gson gson = new Gson();
             String json = gson.toJson(DiscordLeagueBot.serverSettings);
 
-            FileWriter fw = new FileWriter("settings.json");
+            FileWriter fw = new FileWriter("userGuilds.json");
             fw.write(json);
             fw.flush();
             fw.close();
 
         } catch (Exception ex) {}
-    }
-
-
-    public static String getRandString() {
-        String SALTCHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890";
-        StringBuilder salt = new StringBuilder();
-        Random rnd = new Random();
-        while (salt.length() < 13) {
-            int index = (int) (rnd.nextFloat() * SALTCHARS.length());
-            salt.append(SALTCHARS.charAt(index));
-        }
-        String saltStr = salt.toString();
-        return saltStr;
     }
 
     public static byte[] encodePcmToMp3(byte[] pcm) {
@@ -231,7 +185,7 @@ public class DiscordLeagueBot
         });
     }
 
-    public static void joinVoiceChannel(VoiceChannel vc, boolean warning) {
+    public static void joinVoiceChannel(VoiceChannel vc, boolean warning, String saveFolder) {
         System.out.format("Joining '%s' voice channel in %s\n", vc.getName(), vc.getGuild().getName());
 
         try {
@@ -240,23 +194,23 @@ public class DiscordLeagueBot
             if (warning)
                 sendMessage(vc.getGuild().getPublicChannel(), "Please give me permission to join your voice channel!");
         }
-        double volume = DiscordLeagueBot.serverSettings.get(vc.getGuild().getId()).volume;
+        double volume = 0.8;
         vc.getGuild().getAudioManager().setReceivingHandler(new AudioReceiveListener(volume));
         AudioReceiveListener ah = (AudioReceiveListener) vc.getGuild().getAudioManager().getReceiveHandler();
-        ah.rand = DiscordLeagueBot.getRandString();
+        ah.saveloc = saveFolder;
         
 		File dest = null;
         try {
 
             if (new File("recording/").exists()){
-            	if (!(new File ("recording/" + vc.getGuild().getId().toString() + "/").exists())){
-            		File newdir = new File ("recording/" + vc.getGuild().getId().toString() + "/");
+            	if (!(new File ("recording/" + ah.saveloc + "/").exists())){
+            		File newdir = new File ("recording/" + ah.saveloc + "/");
             		newdir.mkdir();
             	}
-            	dest = new File("recording/" + vc.getGuild().getId().toString() + "/" + ah.rand + "_timestamp" + ".txt");
+            	dest = new File("recording/" + ah.saveloc + "/" + "timestamp" + ".txt");
             }
             else 
-                dest = new File("recording/" + vc.getGuild().getId().toString() + "_" + ah.rand + "_timestamp" + ".txt");
+                dest = new File("recording/" + ah.saveloc + "/" + "timestamp" + ".txt");
             
         }
         catch (Exception ex) {
@@ -277,17 +231,23 @@ public class DiscordLeagueBot
         System.out.format("Leaving '%s' voice channel in %s\n", vc.getGuild(), vc.getGuild().getName());
         AudioReceiveListener ah = (AudioReceiveListener) vc.getGuild().getAudioManager().getReceiveHandler();
         File dest = null;
-    	try {
+        try {
 
-            if (new File("recording/" + vc.getGuild().getId().toString() + "/").exists())
-                dest = new File("recording/" + vc.getGuild().getId().toString() + "/" + ah.rand + "_timestamp" + ".txt");
-            else
-                dest = new File("recording/" + vc.getGuild().getId().toString() + "_" + ah.rand + "_timestamp" + ".txt");
+            if (new File("recording/").exists()){
+            	if (!(new File ("recording/" + ah.saveloc + "/").exists())){
+            		File newdir = new File ("recording/" + ah.saveloc + "/");
+            		newdir.mkdir();
+            	}
+            	dest = new File("recording/" + ah.saveloc + "/" + "timestamp" + ".txt");
+            }
+            else 
+                dest = new File("recording/" + ah.saveloc + "/" + "timestamp" + ".txt");
             
         }
         catch (Exception ex) {
             ex.printStackTrace();
         }
+    	
         try(  PrintWriter outfile = new PrintWriter(new FileOutputStream (dest,true))  ){
             outfile.println("Guild: " + vc.getGuild() + " ");
             outfile.append("Time_Left_Channel: " + Instant.now().toEpochMilli());

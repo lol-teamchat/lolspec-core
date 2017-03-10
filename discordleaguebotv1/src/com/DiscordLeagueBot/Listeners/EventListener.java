@@ -5,10 +5,7 @@ import com.DiscordLeagueBot.Configuration.ServerSettings;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
-import net.dv8tion.jda.core.AccountType;
-import net.dv8tion.jda.core.JDABuilder;
 import net.dv8tion.jda.core.entities.Game;
-import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.User;
 import net.dv8tion.jda.core.events.ReadyEvent;
@@ -64,8 +61,17 @@ public class EventListener extends ListenerAdapter {
         
 
         User curr = null;
-        System.out.println("Connecting database...");
+        System.out.println("Connecting to database...");
 
+        
+        /*
+         * Upon being invited to a guild, Janna will query our SQL database and retrieve the data
+         * inputed by the user on the registration page (summoner id, discord name, discord #1234)
+         * and assign this guild to be their default (first checked guild when we choose which
+         * voice channel to move into). It also sets their discord ID if it finds that name and
+         * discriminator combination in our database for easier access later.
+         */
+        
         try (java.sql.Connection connection = DriverManager.getConnection(url, user, password)) {
             System.out.println("Database connected!");
             Statement stmt = connection.createStatement();
@@ -87,6 +93,19 @@ public class EventListener extends ListenerAdapter {
             			ps.setString(3,curr.getDiscriminator());
             			ps.executeUpdate();
             		    ps.close();
+            		    
+            		    //overwrite the old key if it already exists
+            		    if (DiscordLeagueBot.serverSettings.containsKey(discord_id)){
+            		    	 DiscordLeagueBot.serverSettings.replace(discord_id, new ServerSettings(e.getGuild()));
+            		    	 DiscordLeagueBot.writeUserGuildsJson();
+            		    }
+            		    
+            		    //make a new key if not
+            		    else{
+            		    DiscordLeagueBot.serverSettings.put(discord_id, new ServerSettings(e.getGuild()));
+            		    DiscordLeagueBot.writeUserGuildsJson();
+            		    }
+            		    
             		    break;
             		}
             	}
@@ -97,16 +116,13 @@ public class EventListener extends ListenerAdapter {
             throw new IllegalStateException("Cannot connect the database!", e1);
         }	
     	
-        DiscordLeagueBot.serverSettings.put(e.getGuild().getId(), new ServerSettings(e.getGuild()));
-        DiscordLeagueBot.writeSettingsJson();
+        
         
         System.out.format("Joined new server '%s', connected to %s guilds\n", e.getGuild().getName(), e.getJDA().getGuilds().size());
     }
 
     @Override
     public void onGuildLeave(GuildLeaveEvent e) {
-        DiscordLeagueBot.serverSettings.remove(e.getGuild().getId());
-        DiscordLeagueBot.writeSettingsJson();
         System.out.format("Left server '%s', connected to %s guilds\n", e.getGuild().getName(), e.getJDA().getGuilds().size());
     }
 
@@ -140,12 +156,12 @@ public class EventListener extends ListenerAdapter {
         e.getJDA().getPresence().setGame(new Game() {
             @Override
             public String getName() {
-                return "http://xddddd.ddns.net/lolspec/";
+                return "http://teamchat.lol";
             }
 
             @Override
             public String getUrl() {
-                return "http://xddddd.ddns.net/lolspec/";
+                return "http://teamchat.lol";
             }
 
             @Override
@@ -159,7 +175,7 @@ public class EventListener extends ListenerAdapter {
 
             Gson gson = new Gson();
 
-            FileReader fileReader = new FileReader("settings.json");
+            FileReader fileReader = new FileReader("userGuilds.json");
             BufferedReader buffered = new BufferedReader(fileReader);
 
             Type type = new TypeToken<HashMap<String, ServerSettings>>(){}.getType();
@@ -174,36 +190,6 @@ public class EventListener extends ListenerAdapter {
 
         } catch (Exception ex) {
             ex.printStackTrace();
-        }
-
-
-        for (Guild g : e.getJDA().getGuilds()) {    //validate settings files
-            if (!DiscordLeagueBot.serverSettings.containsKey(g.getId())) {
-                DiscordLeagueBot.serverSettings.put(g.getId(), new ServerSettings(g));
-                DiscordLeagueBot.writeSettingsJson();
-            }
-        }
-        
-        //used to delete files after a certain amount of time
-        
-        /*
-        File dir = new File("recording/");
-        if (!dir.exists())
-            dir = new File("recording/");
-
-        for (File f : dir.listFiles()) {
-            if (f.getName().substring(f.getName().lastIndexOf('.'), f.getName().length()).equals(".mp3")) {
-                new Thread (() -> {
-
-                    try { sleep(1000 * 60 * 30); } catch (Exception ex){}
-
-                    f.delete();
-                    System.out.println("\tDeleting file " + f.getName() + "...");
-
-                }).start();
-            }
-        }
-        */
-
+        }     
     }
 }
