@@ -15,3 +15,6 @@
 ##About TeamChat
 
 ###TeamChat is a Discord bot and Overwolf application, which allows concurrent playback of a League of Legends replay and Discord voice chat. It allows management of a "team," which we will track after account creation. If your team gets in a game together while overwolf is running on at least one team member's computer, Janna will automatically join your voice chat and let you know she is recording, then record the audio during the game and leave at the end. Once a game finishes, simply watch the replay via the in-game client and the voice-chat will play through our overwolf application as long as it is running.
+
+
+This project makes use of Matviy's project which can be found [here](https://github.com/Matviy/LeagueReplayHook)
