@@ -15,15 +15,20 @@ public class UserSpeakingListener extends ListenerProxy
 	private VoiceChannel vc;
 	private File dest;
 	
-	public UserSpeakingListener(VoiceChannel voice, String rand){
+	public UserSpeakingListener(VoiceChannel voice, String saveloc){
 		vc = voice;
 		
-		try {
+        try {
 
-            if (new File("recording/" + vc.getGuild().getId().toString() + "/").exists())
-                dest = new File("recording/" + vc.getGuild().getId().toString() + "/" + rand + "_timestamp" + ".txt");
-            else
-                dest = new File("recording/" + vc.getGuild().getId().toString() + "_" + rand + "_timestamp" + ".txt");
+            if (new File("recording/").exists()){
+            	if (!(new File ("recording/" + saveloc + "/").exists())){
+            		File newdir = new File ("recording/" + saveloc + "/");
+            		newdir.mkdir();
+            	}
+            	dest = new File("recording/" + saveloc + "/" + "timestamp" + ".txt");
+            }
+            else 
+                dest = new File("recording/" + saveloc + "/" + "timestamp" + ".txt");
             
         }
         catch (Exception ex) {

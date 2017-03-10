@@ -10,13 +10,13 @@ public class CommandHandler {
         if (commands.containsKey(cmd.invoke)) {
             Boolean safe = true;
 
-            if (safe) {
-            	System.out.println("invokes command");
+            if (safe) {         
                 commands.get(cmd.invoke).action(cmd.args);
                 commands.get(cmd.invoke).executed(safe);
-
             }
+            
             else {
+            	System.err.println("invalid command, please use !joinid ###, !saveid ###, or !leave ###");
                 commands.get(cmd.invoke).executed(safe);
             }
         }

@@ -12,7 +12,12 @@ public class LeaveCommand implements Command {
 
     @Override
     public void action(String[] args) {
-        DiscordLeagueBot.leaveVoiceChannel(DiscordLeagueBot.api.getGuildById(args[0]).getAudioManager().getConnectedChannel());
+    	 try{
+         	DiscordLeagueBot.leaveVoiceChannel(DiscordLeagueBot.api.getGuildById(DiscordLeagueBot.serverSettings.get(args[0]).lastGuildId).getAudioManager().getConnectedChannel());   
+         }
+         catch(Exception e1){
+         	System.err.println("I can't leave channel that I am not in! Or the serverSettings hashtable was set incorrectly");
+         }         
     }
 
     @Override
