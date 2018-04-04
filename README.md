@@ -1,8 +1,15 @@
 # TeamChat
 
-##Official Site: http://teamchat.lol/ 
+*NOTE: Currently down while we move from Overwolf to a standalone application*
+___
 
-##Steps to get the application working:
+## Official Site: ~~http://teamchat.lol/~~ **Not Currently Available**
+
+___
+
+## Steps to get the application working
+
+___
 
 1. Create an account on our site
 2. fill out all required fields, then click the link to invite our bot "Janna" to your discord server
@@ -12,9 +19,11 @@
 6. Make sure overwolf is running in the system tray when playing a League game and it will record
 7. When watching a replay from in-client, make sure overwolf is running to get the audio
 
-##About TeamChat
+## About TeamChat
 
-###TeamChat is a Discord bot and Overwolf application, which allows concurrent playback of a League of Legends replay and Discord voice chat. It allows management of a "team," which we will track after account creation. If your team gets in a game together while overwolf is running on at least one team member's computer, Janna will automatically join your voice chat and let you know she is recording, then record the audio during the game and leave at the end. Once a game finishes, simply watch the replay via the in-game client and the voice-chat will play through our overwolf application as long as it is running.
+___
+
+### TeamChat is a Discord bot and Overwolf application, which allows concurrent playback of a League of Legends replay and Discord voice chat. It allows management of a "team," which we will track after account creation. If your team gets in a game together while overwolf is running on at least one team member's computer, Janna will automatically join your voice chat and let you know she is recording, then record the audio during the game and leave at the end. Once a game finishes, simply watch the replay via the in-game client and the voice-chat will play through our overwolf application as long as it is running.
 
 
 This project makes use of Matviy's project which can be found [here](https://github.com/Matviy/LeagueReplayHook)
