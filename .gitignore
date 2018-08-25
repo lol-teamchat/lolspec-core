@@ -11,3 +11,4 @@ token_loc
 names
 secret
 .remote-sync.json
+!overwolf-app/plugins/*
