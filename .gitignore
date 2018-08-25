@@ -10,3 +10,4 @@ settings.json
 token_loc
 names
 secret
+.remote-sync.json

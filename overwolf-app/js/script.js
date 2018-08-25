@@ -188,7 +188,10 @@ $(document).ready(function() {
 		console.log("audiosync plugin is initialized");
 
 		// run game start logic;
-		getServer();
+    audiosync.get().onTimeSeek.addListener(function(newtime) {
+      console.log("timeseek: ", newtime);
+    });
+    //getServer();
 	});
 
 	// called whenever the game window is changed
